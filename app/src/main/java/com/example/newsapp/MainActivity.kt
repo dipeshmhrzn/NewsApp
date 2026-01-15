@@ -4,6 +4,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import com.example.newsapp.presentation.onboardingscreen.OnBoardingScreen
+import com.example.newsapp.presentation.onboardingscreen.components.OnboardingPager
 import com.example.newsapp.presentation.splashscreen.SplashScreen
 import com.example.newsapp.ui.theme.NewsAppTheme
 
@@ -13,7 +15,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             NewsAppTheme {
-                SplashScreen()
+                OnBoardingScreen()
             }
         }
     }
