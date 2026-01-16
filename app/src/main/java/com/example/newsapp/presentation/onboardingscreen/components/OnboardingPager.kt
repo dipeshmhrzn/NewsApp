@@ -70,7 +70,7 @@ fun OnboardingPager(
     )
 
     Box(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize().background(Color(0xFFE5E5E5))
     ) {
         Column(
             modifier = Modifier.fillMaxSize()
