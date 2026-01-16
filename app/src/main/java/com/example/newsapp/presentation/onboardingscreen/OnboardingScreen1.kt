@@ -2,12 +2,14 @@ package com.example.newsapp.presentation.onboardingscreen
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavHostController
 import com.example.newsapp.R
+import com.example.newsapp.navigation.Routes
 import com.example.newsapp.presentation.onboardingscreen.components.OnboardingItem
 import com.example.newsapp.presentation.onboardingscreen.components.OnboardingPager
 
 @Composable
-fun OnBoardingScreen(modifier: Modifier = Modifier) {
+fun OnBoardingScreen(navHostController: NavHostController) {
     val items = listOf(
         OnboardingItem(
             image = R.drawable.onboarding1,
@@ -26,6 +28,14 @@ fun OnBoardingScreen(modifier: Modifier = Modifier) {
         )
     )
 
-    OnboardingPager(items = items)
+    OnboardingPager(
+        items = items,
+        onNavigateToLoginScreen = {
+            navHostController.navigate(Routes.LoginScreen) {
+                popUpTo(Routes.OnboardingScreen) {
+                    inclusive = true
+                }
+            }
+        })
 
 }

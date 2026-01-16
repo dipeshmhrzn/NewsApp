@@ -43,7 +43,8 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun OnboardingPager(
-    items: List<OnboardingItem>
+    items: List<OnboardingItem>,
+    onNavigateToLoginScreen: () -> Unit
 ) {
 
     val pagerState = rememberPagerState { items.size }
@@ -170,7 +171,9 @@ fun OnboardingPager(
         ) {
             if (skipWeight > 0f) {
                 Button(
-                    onClick = {},
+                    onClick = {
+                        onNavigateToLoginScreen()
+                    },
                     modifier = Modifier
                         .weight(skipWeight)
                         .height(50.dp),
@@ -193,7 +196,7 @@ fun OnboardingPager(
                         if (!isLastPage) {
                             pagerState.animateScrollToPage(pagerState.currentPage + 1)
                         } else {
-                            //Navigate to login
+                            onNavigateToLoginScreen()
                         }
                     }
                 },

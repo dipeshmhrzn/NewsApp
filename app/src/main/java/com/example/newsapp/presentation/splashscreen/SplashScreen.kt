@@ -21,12 +21,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+import com.example.newsapp.navigation.Routes
 import com.example.newsapp.ui.theme.NewsAppTheme
 import com.example.newsapp.ui.theme.PlayFairDisplay
 import kotlinx.coroutines.delay
 
 @Composable
-fun SplashScreen() {
+fun SplashScreen(
+    navHostController: NavHostController
+) {
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = Color(0xFFE5E5E5)
@@ -42,6 +47,11 @@ fun SplashScreen() {
         LaunchedEffect(Unit) {
             delay(300)
             startAnimation=true
+
+            delay(1200) // animation duration
+            navHostController.navigate(Routes.OnboardingScreen) {
+                popUpTo(Routes.SplashScreen) { inclusive = true }
+            }
         }
 
         Box(
@@ -65,6 +75,6 @@ fun SplashScreen() {
 @Composable
 private fun SplashScreenPreview() {
     NewsAppTheme {
-        SplashScreen()
+        SplashScreen(rememberNavController())
     }
 }
