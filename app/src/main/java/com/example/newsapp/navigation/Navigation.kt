@@ -8,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.newsapp.presentation.auth.LoginScreen
+import com.example.newsapp.presentation.auth.SignUpScreen
 import com.example.newsapp.presentation.onboardingscreen.OnBoardingScreen
 import com.example.newsapp.presentation.splashscreen.SplashScreen
 
@@ -47,7 +48,19 @@ fun Navigation() {
                 )
             }
         ) {
-            LoginScreen()
+            LoginScreen(navHostController = navController)
+
+        }
+
+        composable<Routes.SignUpScreen>(
+            enterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { it }, // slide in from right
+                    animationSpec = tween(1000)
+                )
+            }
+        ) {
+            SignUpScreen(navHostController = navController)
 
         }
     }
