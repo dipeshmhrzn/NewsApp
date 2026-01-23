@@ -1,12 +1,5 @@
 package com.example.newsapp.presentation.mainscreen
 
-import android.content.ActivityNotFoundException
-import android.content.Context
-import android.content.Intent
-import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -17,16 +10,12 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -42,24 +31,20 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import androidx.core.net.toUri
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
-import com.example.newsapp.navigation.Routes
 import com.example.newsapp.presentation.mainscreen.components.NewsCard
 import com.example.newsapp.presentation.mainscreen.components.TopHeadLinesCard
 import com.example.newsapp.ui.theme.InterDisplay
-import com.example.newsapp.ui.theme.NewsAppTheme
 import com.example.newsapp.ui.theme.PlayFairDisplay
 
 @Composable
 fun HomeScreen(
     onSeeAll: () -> Unit,
-    onCardClick: () -> Unit
+    onHeadlineCardClick: () -> Unit,
+    onNewsCardClick: () -> Unit,
+    onMenuClick: () -> Unit
 ) {
 
     val context = LocalContext.current
@@ -112,10 +97,16 @@ fun HomeScreen(
             }
             LazyRow {
                 items(10) {
-                    TopHeadLinesCard(
-                        cardWidth,
-                        onCardClick = onCardClick
-                    )
+
+                    Box(
+                        modifier = Modifier.padding(start = 8.dp, top = 8.dp, bottom = 8.dp)
+                    ) {
+                        TopHeadLinesCard(
+                            cardWidth,
+                            onCardClick = onHeadlineCardClick,
+                            onMenuClick = onMenuClick
+                        )
+                    }
                 }
             }
         }
@@ -168,7 +159,11 @@ fun HomeScreen(
         }
         items(20) {
 
-            NewsCard()
+            Box(
+                modifier = Modifier.padding(8.dp)
+            ) {
+                NewsCard(onCardClick = onNewsCardClick)
+            }
         }
     }
 }

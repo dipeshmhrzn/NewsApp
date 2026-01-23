@@ -9,6 +9,7 @@ import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,10 +18,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -50,107 +53,103 @@ import com.example.newsapp.ui.theme.NewsAppTheme
 @Composable
 fun TopHeadLinesCard(
     screenWidth: Dp,
-    allPage: Boolean = false,
-    onCardClick: () -> Unit
+    onCardClick: () -> Unit,
+    onMenuClick: () -> Unit
 ) {
 
-
-    Column(
+    Box(
         modifier = Modifier
-            .width(screenWidth)
-            .padding(start = 16.dp, top = 16.dp, end = if (allPage) 16.dp else 8.dp)
+            .clip(shape = RoundedCornerShape(10.dp))
             .clickable {
                 onCardClick()
             }
     ) {
-
-        AsyncImage(
-            model = R.drawable.onboarding1,
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(150.dp)
-                .clip(RoundedCornerShape(8.dp))
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = "Sean Conlon, Chloe Taylor, Pia Singh",
-            fontSize = 18.sp,
-            fontFamily = InterDisplay,
-            fontWeight = FontWeight.Normal,
-            color = Color(0xFF4E4B66)
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = "Stocks rebound from big sell-off after Trump rules out military action on Greenland: Live updates - CNBC",
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            fontSize = 20.sp,
-            fontFamily = InterDisplay,
-            fontWeight = FontWeight.Normal,
-        )
-
-        Spacer(modifier = Modifier.height(6.dp))
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
+                .width(screenWidth)
+                .padding(8.dp)
         ) {
-            Text(
-                text = "CNBC",
-                fontSize = 16.sp,
-                fontFamily = InterDisplay,
-                fontWeight = FontWeight.Medium,
-                color = Color(0xFF737373)
 
-            )
-
-            Spacer(modifier = Modifier.width(10.dp))
-            Icon(
-                imageVector = Icons.Default.AccessTime,
+            AsyncImage(
+                model = R.drawable.onboarding1,
                 contentDescription = null,
-                tint = Color(0xFF4E4B66),
-                modifier = Modifier.size(20.dp)
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(150.dp)
+                    .clip(RoundedCornerShape(8.dp))
             )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
             Text(
-                text = "4h ago",
-                fontSize = 16.sp,
+                text = "Sean Conlon, Chloe Taylor, Pia Singh",
+                fontSize = 18.sp,
                 fontFamily = InterDisplay,
                 fontWeight = FontWeight.Normal,
                 color = Color(0xFF4E4B66)
             )
-            Spacer(modifier = Modifier.weight(1f))
 
-            ShareHandler(url = "https://google.com") { onShare ->
-                IconButton(onClick = onShare) {
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "Stocks rebound from big sell-off after Trump rules out military action on Greenland: Live updates - CNBC",
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                fontSize = 20.sp,
+                fontFamily = InterDisplay,
+                fontWeight = FontWeight.Normal,
+            )
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = "CNBC",
+                    fontSize = 16.sp,
+                    fontFamily = InterDisplay,
+                    fontWeight = FontWeight.Medium,
+                    color = Color(0xFF737373)
+
+                )
+
+                Spacer(modifier = Modifier.width(10.dp))
+                Icon(
+                    imageVector = Icons.Default.AccessTime,
+                    contentDescription = null,
+                    tint = Color(0xFF4E4B66),
+                    modifier = Modifier.size(20.dp)
+                )
+                Text(
+                    text = "4h ago",
+                    fontSize = 16.sp,
+                    fontFamily = InterDisplay,
+                    fontWeight = FontWeight.Normal,
+                    color = Color(0xFF4E4B66)
+                )
+                Spacer(modifier = Modifier.weight(1f))
+
+                Box(
+                    modifier = Modifier
+                        .clip(shape = RoundedCornerShape(6.dp))
+                        .clickable {
+                            onMenuClick()
+                        }
+                        .padding(4.dp),
+                ) {
                     Icon(
-                        imageVector = Icons.Default.Share,
+                        imageVector = Icons.Default.MoreVert,
                         contentDescription = null,
                         tint = Color(0xFF4E4B66),
                         modifier = Modifier.size(20.dp)
 
                     )
                 }
+
             }
-
-            OpenWebsiteHandler(url = "https://google.com") { onRedirect ->
-                IconButton(onClick = onRedirect) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.OpenInNew,
-                        contentDescription = null,
-                        tint = Color(0xFF4E4B66),
-                        modifier = Modifier.size(20.dp)
-
-                    )
-                }
-            }
-
         }
-
 
     }
 }

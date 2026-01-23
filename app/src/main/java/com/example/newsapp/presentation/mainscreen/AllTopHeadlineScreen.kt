@@ -1,5 +1,6 @@
 package com.example.newsapp.presentation.mainscreen
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -56,15 +57,24 @@ fun AllTopHeadlineScreen(navHostController: NavHostController) {
             )
         },
         containerColor = Color(0xFFE5E5E5)
-        ) { paddingValues ->
+    ) { paddingValues ->
         LazyColumn(
             modifier = Modifier.padding(paddingValues)
         ) {
             items(20) {
-                TopHeadLinesCard(screenWidth,true,
-                    onCardClick = {
-                        navHostController.navigate(Routes.NewsDetailScreen)
-                    })
+                Box(
+                    modifier = Modifier.padding(8.dp)
+                ) {
+                    TopHeadLinesCard(
+                        screenWidth,
+                        onCardClick = {
+                            navHostController.navigate(Routes.NewsDetailScreen)
+                        },
+                        onMenuClick = {
+
+                        }
+                    )
+                }
             }
 
         }
