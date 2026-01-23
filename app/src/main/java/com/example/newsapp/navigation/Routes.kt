@@ -17,5 +17,16 @@ sealed class Routes {
     @Serializable
     data object SignUpScreen: Routes()
 
+    @Serializable
+    data object MainScreen: Routes()
+
+    @Serializable
+    data object HomeScreen : Routes()
+
+    @Serializable
+    data object FollowingScreen : Routes()
+
+    @Serializable
+    data object BookmarkScreen : Routes()
 
 }

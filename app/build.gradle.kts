@@ -65,5 +65,8 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation("androidx.compose.animation:animation:1.6.1")
 
+    implementation("androidx.compose.material:material-icons-extended:1.5.0")
+    implementation("androidx.browser:browser:1.5.0")
+
 
 }

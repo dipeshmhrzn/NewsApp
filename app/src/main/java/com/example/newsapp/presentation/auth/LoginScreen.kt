@@ -105,7 +105,13 @@ fun LoginScreen(
             }
 
             CustomButton(
-                onButtonClick = {},
+                onButtonClick = {
+                    navHostController.navigate(Routes.MainScreen){
+                        popUpTo(Routes.LoginScreen){
+                            inclusive=true
+                        }
+                    }
+                },
                 buttonText = "Login"
             )
 

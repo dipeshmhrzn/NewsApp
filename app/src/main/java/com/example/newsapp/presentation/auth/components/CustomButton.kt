@@ -27,7 +27,7 @@ fun CustomButton(
             .height(50.dp),
         shape = RoundedCornerShape(10.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = Color(0xFF0295F6),
+            containerColor = Color(0xFF02040D),
             contentColor = Color.White
         )
     ) {

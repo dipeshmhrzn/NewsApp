@@ -9,6 +9,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.newsapp.presentation.auth.LoginScreen
 import com.example.newsapp.presentation.auth.SignUpScreen
+import com.example.newsapp.presentation.mainscreen.BookmarkScreen
+import com.example.newsapp.presentation.mainscreen.FollowingScreen
+import com.example.newsapp.presentation.mainscreen.HomeScreen
+import com.example.newsapp.presentation.mainscreen.MainScreen
 import com.example.newsapp.presentation.onboardingscreen.OnBoardingScreen
 import com.example.newsapp.presentation.splashscreen.SplashScreen
 
@@ -63,6 +67,12 @@ fun Navigation() {
             SignUpScreen(navHostController = navController)
 
         }
+
+        composable<Routes.MainScreen> {
+            MainScreen()
+        }
+
+
     }
 
 }
