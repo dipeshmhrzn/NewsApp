@@ -9,10 +9,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.newsapp.presentation.auth.LoginScreen
 import com.example.newsapp.presentation.auth.SignUpScreen
-import com.example.newsapp.presentation.mainscreen.BookmarkScreen
-import com.example.newsapp.presentation.mainscreen.FollowingScreen
-import com.example.newsapp.presentation.mainscreen.HomeScreen
+import com.example.newsapp.presentation.mainscreen.AllTopHeadlineScreen
 import com.example.newsapp.presentation.mainscreen.MainScreen
+import com.example.newsapp.presentation.mainscreen.NewsDetailScreen
 import com.example.newsapp.presentation.onboardingscreen.OnBoardingScreen
 import com.example.newsapp.presentation.splashscreen.SplashScreen
 
@@ -39,6 +38,12 @@ fun Navigation() {
                     initialOffsetX = { it }, // slide in from right
                     animationSpec = tween(1000)
                 )
+            },
+            exitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { -it },
+                    animationSpec = tween(500)
+                )
             }
         ) {
             OnBoardingScreen(navHostController = navController)
@@ -49,6 +54,12 @@ fun Navigation() {
                 slideInHorizontally(
                     initialOffsetX = { it }, // slide in from right
                     animationSpec = tween(1000)
+                )
+            },
+            exitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { -it },
+                    animationSpec = tween(500)
                 )
             }
         ) {
@@ -62,16 +73,69 @@ fun Navigation() {
                     initialOffsetX = { it }, // slide in from right
                     animationSpec = tween(1000)
                 )
+            },
+            exitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { -it },
+                    animationSpec = tween(500)
+                )
             }
         ) {
             SignUpScreen(navHostController = navController)
 
         }
 
-        composable<Routes.MainScreen> {
-            MainScreen()
+        composable<Routes.MainScreen>(
+            enterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { it }, // slide in from right
+                    animationSpec = tween(1000)
+                )
+            },
+            exitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { -it },
+                    animationSpec = tween(500)
+                )
+            }
+        ) {
+            MainScreen(navController)
         }
 
+
+        composable<Routes.ALlTopHeadlineScreen>(
+            enterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { it }, // slide in from right
+                    animationSpec = tween(1000)
+                )
+            },
+            exitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { -it },
+                    animationSpec = tween(500)
+                )
+            }
+        ) {
+            AllTopHeadlineScreen(navController)
+        }
+
+        composable<Routes.NewsDetailScreen>(
+            enterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { it }, // slide in from right
+                    animationSpec = tween(1000)
+                )
+            },
+            exitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { -it },
+                    animationSpec = tween(500)
+                )
+            }
+        ) {
+            NewsDetailScreen(navController)
+        }
 
     }
 

@@ -39,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -48,6 +49,7 @@ import androidx.compose.ui.zIndex
 import androidx.core.net.toUri
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.newsapp.navigation.Routes
 import com.example.newsapp.presentation.mainscreen.components.NewsCard
 import com.example.newsapp.presentation.mainscreen.components.TopHeadLinesCard
 import com.example.newsapp.ui.theme.InterDisplay
@@ -55,7 +57,10 @@ import com.example.newsapp.ui.theme.NewsAppTheme
 import com.example.newsapp.ui.theme.PlayFairDisplay
 
 @Composable
-fun HomeScreen(navHostController: NavHostController) {
+fun HomeScreen(
+    onSeeAll: () -> Unit,
+    onCardClick: () -> Unit
+) {
 
     val context = LocalContext.current
 
@@ -74,6 +79,8 @@ fun HomeScreen(navHostController: NavHostController) {
 
     val listState = rememberLazyListState()
 
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val cardWidth = screenWidth * 0.9f
 
     LazyColumn(
         state = listState,
@@ -93,7 +100,7 @@ fun HomeScreen(navHostController: NavHostController) {
                     fontFamily = PlayFairDisplay,
                     fontWeight = FontWeight.Bold
                 )
-                TextButton(onClick = {}) {
+                TextButton(onClick = onSeeAll) {
                     Text(
                         text = "See all",
                         fontSize = 20.sp,
@@ -105,7 +112,10 @@ fun HomeScreen(navHostController: NavHostController) {
             }
             LazyRow {
                 items(10) {
-                    TopHeadLinesCard()
+                    TopHeadLinesCard(
+                        cardWidth,
+                        onCardClick = onCardClick
+                    )
                 }
             }
         }
@@ -162,25 +172,5 @@ fun HomeScreen(navHostController: NavHostController) {
         }
     }
 }
-
-
-fun openWebsite(context: Context, url: String) {
-    val builder = CustomTabsIntent.Builder()
-    builder.setShowTitle(true)
-    builder.setInstantAppsEnabled(true)
-
-    val customTabsIntent = builder.build()
-    try {
-        customTabsIntent.launchUrl(context, url.toUri())
-    } catch (e: ActivityNotFoundException) {
-        try {
-            val fallbackIntent = Intent(Intent.ACTION_VIEW, url.toUri())
-            context.startActivity(fallbackIntent)
-        } catch (ex: Exception) {
-            Toast.makeText(context, "No browser found to open link", Toast.LENGTH_SHORT).show()
-        }
-    }
-}
-
 
 

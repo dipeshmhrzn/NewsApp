@@ -38,6 +38,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
@@ -47,15 +48,20 @@ import com.example.newsapp.ui.theme.InterDisplay
 import com.example.newsapp.ui.theme.NewsAppTheme
 
 @Composable
-fun TopHeadLinesCard() {
+fun TopHeadLinesCard(
+    screenWidth: Dp,
+    allPage: Boolean = false,
+    onCardClick: () -> Unit
+) {
 
-    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-    val cardWidth = screenWidth * 0.9f
 
     Column(
         modifier = Modifier
-            .width(cardWidth)
-            .padding(start = 16.dp, top = 16.dp, end = 8.dp)
+            .width(screenWidth)
+            .padding(start = 16.dp, top = 16.dp, end = if (allPage) 16.dp else 8.dp)
+            .clickable {
+                onCardClick()
+            }
     ) {
 
         AsyncImage(
@@ -179,13 +185,13 @@ fun OpenWebsiteHandler(
     content: @Composable (onRedirect: () -> Unit) -> Unit
 ) {
 
-    val context= LocalContext.current
+    val context = LocalContext.current
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { }
 
-    content{
+    content {
         val builder = CustomTabsIntent.Builder().apply {
             setShowTitle(true)
             setInstantAppsEnabled(true)
