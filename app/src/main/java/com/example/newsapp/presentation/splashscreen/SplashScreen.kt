@@ -34,7 +34,7 @@ fun SplashScreen(
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = Color(0xFFE5E5E5)
+        color = Color(0xFFFFFFFF)
     ) {
 
         var startAnimation by remember { mutableStateOf(false) }

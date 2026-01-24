@@ -52,11 +52,11 @@ fun AllTopHeadlineScreen(navHostController: NavHostController) {
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color(0xFFE5E5E5)
+                    containerColor = Color(0xFFFFFFFF)
                 )
             )
         },
-        containerColor = Color(0xFFE5E5E5)
+        containerColor = Color(0xFFFFFFFF)
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier.padding(paddingValues)

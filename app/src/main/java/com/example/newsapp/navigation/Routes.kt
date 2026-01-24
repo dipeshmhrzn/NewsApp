@@ -27,7 +27,7 @@ sealed class Routes {
     data object FollowingScreen : Routes()
 
     @Serializable
-    data object BookmarkScreen : Routes()
+    data object SourceScreen : Routes()
 
     @Serializable
     data object ALlTopHeadlineScreen : Routes()

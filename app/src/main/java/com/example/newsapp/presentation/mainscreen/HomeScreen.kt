@@ -118,7 +118,7 @@ fun HomeScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(
-                        if (isStuck) Color(0xFFE5E5E5)
+                        if (isStuck) Color(0xFFFFFFFF)
                         else Color.Transparent
                     )
                     .padding(vertical = 8.dp)

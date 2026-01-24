@@ -1,21 +1,16 @@
 package com.example.newsapp.presentation.mainscreen.components
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.Apartment
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.StarBorder
-import androidx.compose.material.icons.outlined.Bookmark
-import androidx.compose.material.icons.outlined.BookmarkBorder
+import androidx.compose.material.icons.outlined.Apartment
 import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
@@ -79,9 +74,9 @@ fun BottomBar(navHostController: NavHostController) {
         )
 
         NavigationBarItem(
-            selected = destination?.hasRoute<Routes.BookmarkScreen>() == true,
+            selected = destination?.hasRoute<Routes.SourceScreen>() == true,
             onClick = {
-                navHostController.navigate(Routes.BookmarkScreen) {
+                navHostController.navigate(Routes.SourceScreen) {
                     popUpTo(Routes.HomeScreen) { saveState = true }
                     launchSingleTop = true
                     restoreState = true
@@ -89,8 +84,8 @@ fun BottomBar(navHostController: NavHostController) {
             },
             icon = {
                 Icon(
-                    imageVector = if (destination?.hasRoute<Routes.BookmarkScreen>() == true ) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
-                    contentDescription = "Bookmark"
+                    imageVector = if (destination?.hasRoute<Routes.SourceScreen>() == true ) Icons.Filled.Apartment else Icons.Outlined.Apartment,
+                    contentDescription = "Sources"
                 )
             },
             colors = NavigationBarItemDefaults.colors(

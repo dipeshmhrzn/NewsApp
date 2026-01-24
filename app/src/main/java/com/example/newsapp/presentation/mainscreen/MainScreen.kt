@@ -23,10 +23,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.BookmarkBorder
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -49,8 +47,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.newsapp.navigation.Routes
 import com.example.newsapp.presentation.mainscreen.components.BottomBar
-import com.example.newsapp.presentation.mainscreen.components.OpenWebsiteHandler
-import com.example.newsapp.presentation.mainscreen.components.ShareHandler
 import com.example.newsapp.presentation.mainscreen.components.TopAppBar
 import com.example.newsapp.ui.theme.InterDisplay
 
@@ -69,7 +65,7 @@ fun MainScreen(navHostController: NavHostController) {
     val topBarTitle = when {
         destination?.hasRoute<Routes.HomeScreen>() == true -> "NewsApp"
         destination?.hasRoute<Routes.FollowingScreen>() == true -> "Following"
-        destination?.hasRoute<Routes.BookmarkScreen>() == true -> "Bookmark"
+        destination?.hasRoute<Routes.SourceScreen>() == true -> "Sources"
         else -> ""
     }
     Box(modifier = Modifier.fillMaxSize()) {
@@ -87,7 +83,7 @@ fun MainScreen(navHostController: NavHostController) {
                     BottomBar(innerNavController)
                 }
             },
-            containerColor = Color(0xFFE5E5E5),
+            containerColor = Color(0xFFFFFFFF),
         ) { innerPadding ->
 
             NavHost(
@@ -142,7 +138,7 @@ fun MainScreen(navHostController: NavHostController) {
                     FollowingScreen(innerNavController)
                 }
 
-                composable<Routes.BookmarkScreen>(
+                composable<Routes.SourceScreen>(
                     enterTransition = {
                         slideInHorizontally(
                             initialOffsetX = { it }, // slide in from right
@@ -156,7 +152,7 @@ fun MainScreen(navHostController: NavHostController) {
                         )
                     }
                 ) {
-                    BookmarkScreen(innerNavController)
+                    SourceScreen(innerNavController)
                 }
 
             }
@@ -186,7 +182,7 @@ fun MainScreen(navHostController: NavHostController) {
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
-                            .background(Color(0xFFE5E5E5))
+                            .background(Color(0xFFFFFFFF))
                             .clickable(
                                 indication = null,
                                 interactionSource = remember { MutableInteractionSource() }

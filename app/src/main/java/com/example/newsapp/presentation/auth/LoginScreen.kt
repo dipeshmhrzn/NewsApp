@@ -37,7 +37,7 @@ fun LoginScreen(
     navHostController: NavHostController
 ) {
     Scaffold(
-        containerColor = Color(0xFFE5E5E5)
+        containerColor = Color(0xFFFFFFFF)
     ) { innerPadding ->
 
         var email by remember { mutableStateOf("") }

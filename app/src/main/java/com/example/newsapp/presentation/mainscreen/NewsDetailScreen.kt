@@ -113,7 +113,7 @@ fun NewsDetailScreen(navHostController: NavHostController) {
                 }
             }
         },
-        containerColor = Color(0xFFE5E5E5),
+        containerColor = Color(0xFFFFFFFF),
     ) { innerPadding ->
 
         Column(
