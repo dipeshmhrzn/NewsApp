@@ -35,4 +35,7 @@ sealed class Routes {
     @Serializable
     data object NewsDetailScreen : Routes()
 
+    @Serializable
+    data object ProfileScreen : Routes()
+
 }

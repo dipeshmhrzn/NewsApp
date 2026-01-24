@@ -1,12 +1,16 @@
 package com.example.newsapp.navigation
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.newsapp.presentation.ProfileScreen
 import com.example.newsapp.presentation.auth.LoginScreen
 import com.example.newsapp.presentation.auth.SignUpScreen
 import com.example.newsapp.presentation.mainscreen.AllTopHeadlineScreen
@@ -24,8 +28,12 @@ fun Navigation() {
 
             exitTransition = {
                 slideOutHorizontally(
-                    targetOffsetX = { -it },
-                    animationSpec = tween(500)
+                    targetOffsetX = { it },
+                    animationSpec = tween(
+                        durationMillis = 500,
+                        easing = FastOutSlowInEasing
+                    )
+
                 )
             }
         ) {
@@ -34,15 +42,20 @@ fun Navigation() {
 
         composable<Routes.OnboardingScreen>(
             enterTransition = {
-                slideInHorizontally(
-                    initialOffsetX = { it }, // slide in from right
-                    animationSpec = tween(1000)
+                fadeIn(
+                    animationSpec = tween(
+                        durationMillis = 500,
+                        easing = LinearEasing
+                    )
                 )
             },
-            exitTransition = {
+            popExitTransition = {
                 slideOutHorizontally(
-                    targetOffsetX = { -it },
-                    animationSpec = tween(500)
+                    targetOffsetX = { it },
+                    animationSpec = tween(
+                        durationMillis = 500,
+                        easing = FastOutSlowInEasing
+                    )
                 )
             }
         ) {
@@ -51,15 +64,20 @@ fun Navigation() {
 
         composable<Routes.LoginScreen>(
             enterTransition = {
-                slideInHorizontally(
-                    initialOffsetX = { it }, // slide in from right
-                    animationSpec = tween(1000)
+                fadeIn(
+                    animationSpec = tween(
+                        durationMillis = 500,
+                        easing = LinearEasing
+                    )
                 )
             },
-            exitTransition = {
+            popExitTransition = {
                 slideOutHorizontally(
-                    targetOffsetX = { -it },
-                    animationSpec = tween(500)
+                    targetOffsetX = { it },
+                    animationSpec = tween(
+                        durationMillis = 500,
+                        easing = FastOutSlowInEasing
+                    )
                 )
             }
         ) {
@@ -69,15 +87,20 @@ fun Navigation() {
 
         composable<Routes.SignUpScreen>(
             enterTransition = {
-                slideInHorizontally(
-                    initialOffsetX = { it }, // slide in from right
-                    animationSpec = tween(1000)
+                fadeIn(
+                    animationSpec = tween(
+                        durationMillis = 500,
+                        easing = LinearEasing
+                    )
                 )
             },
-            exitTransition = {
+            popExitTransition = {
                 slideOutHorizontally(
-                    targetOffsetX = { -it },
-                    animationSpec = tween(500)
+                    targetOffsetX = { it },
+                    animationSpec = tween(
+                        durationMillis = 500,
+                        easing = FastOutSlowInEasing
+                    )
                 )
             }
         ) {
@@ -87,15 +110,20 @@ fun Navigation() {
 
         composable<Routes.MainScreen>(
             enterTransition = {
-                slideInHorizontally(
-                    initialOffsetX = { it }, // slide in from right
-                    animationSpec = tween(1000)
+                fadeIn(
+                    animationSpec = tween(
+                        durationMillis = 500,
+                        easing = LinearEasing
+                    )
                 )
             },
-            exitTransition = {
+            popExitTransition = {
                 slideOutHorizontally(
-                    targetOffsetX = { -it },
-                    animationSpec = tween(500)
+                    targetOffsetX = { it },
+                    animationSpec = tween(
+                        durationMillis = 500,
+                        easing = FastOutSlowInEasing
+                    )
                 )
             }
         ) {
@@ -105,15 +133,20 @@ fun Navigation() {
 
         composable<Routes.ALlTopHeadlineScreen>(
             enterTransition = {
-                slideInHorizontally(
-                    initialOffsetX = { it }, // slide in from right
-                    animationSpec = tween(1000)
+                fadeIn(
+                    animationSpec = tween(
+                        durationMillis = 500,
+                        easing = LinearEasing
+                    )
                 )
             },
-            exitTransition = {
+            popExitTransition = {
                 slideOutHorizontally(
-                    targetOffsetX = { -it },
-                    animationSpec = tween(500)
+                    targetOffsetX = { it },
+                    animationSpec = tween(
+                        durationMillis = 500,
+                        easing = FastOutSlowInEasing
+                    )
                 )
             }
         ) {
@@ -122,19 +155,47 @@ fun Navigation() {
 
         composable<Routes.NewsDetailScreen>(
             enterTransition = {
-                slideInHorizontally(
-                    initialOffsetX = { it }, // slide in from right
-                    animationSpec = tween(1000)
+                fadeIn(
+                    animationSpec = tween(
+                        durationMillis = 500,
+                        easing = LinearEasing
+                    )
                 )
             },
-            exitTransition = {
+            popExitTransition = {
                 slideOutHorizontally(
-                    targetOffsetX = { -it },
-                    animationSpec = tween(500)
+                    targetOffsetX = { it },
+                    animationSpec = tween(
+                        durationMillis = 500,
+                        easing = FastOutSlowInEasing
+                    )
                 )
             }
         ) {
             NewsDetailScreen(navController)
+        }
+
+
+        composable<Routes.ProfileScreen>(
+            enterTransition = {
+                fadeIn(
+                    animationSpec = tween(
+                        durationMillis = 500,
+                        easing = LinearEasing
+                    )
+                )
+            },
+            popExitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { it },
+                    animationSpec = tween(
+                        durationMillis = 500,
+                        easing = FastOutSlowInEasing
+                    )
+                )
+            }
+        ) {
+            ProfileScreen()
         }
 
     }

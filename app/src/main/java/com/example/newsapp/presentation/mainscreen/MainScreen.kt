@@ -1,7 +1,10 @@
 package com.example.newsapp.presentation.mainscreen
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
@@ -75,7 +78,9 @@ fun MainScreen(navHostController: NavHostController) {
                 TopAppBar(
                     title = topBarTitle,
                     onSearchClick = {},
-                    onProfileClick = {}
+                    onProfileClick = {
+                        navHostController.navigate(Routes.ProfileScreen)
+                    }
                 )
             },
             bottomBar = {
@@ -93,16 +98,20 @@ fun MainScreen(navHostController: NavHostController) {
             ) {
                 composable<Routes.HomeScreen>(
                     enterTransition = {
-                        slideInHorizontally(
-                            initialOffsetX = { it }, // slide in from right
-                            animationSpec = tween(1000)
+                        fadeIn(
+                            animationSpec = tween(
+                                durationMillis = 500,
+                                easing = LinearEasing
+                            )
                         )
                     },
-                    exitTransition = {
+                    popExitTransition = {
                         slideOutHorizontally(
-                            targetOffsetX = { -it },
-                            animationSpec = tween(500)
-                        )
+                            targetOffsetX = { it },
+                            animationSpec = tween(
+                                durationMillis = 500,
+                                easing = FastOutSlowInEasing
+                            )                        )
                     }
                 ) {
                     HomeScreen(
@@ -123,16 +132,20 @@ fun MainScreen(navHostController: NavHostController) {
 
                 composable<Routes.FollowingScreen>(
                     enterTransition = {
-                        slideInHorizontally(
-                            initialOffsetX = { it }, // slide in from right
-                            animationSpec = tween(1000)
+                        fadeIn(
+                            animationSpec = tween(
+                                durationMillis = 500,
+                                easing = LinearEasing
+                            )
                         )
                     },
-                    exitTransition = {
+                    popExitTransition = {
                         slideOutHorizontally(
-                            targetOffsetX = { -it },
-                            animationSpec = tween(500)
-                        )
+                            targetOffsetX = { it },
+                            animationSpec = tween(
+                                durationMillis = 500,
+                                easing = FastOutSlowInEasing
+                            )                        )
                     }
                 ) {
                     FollowingScreen(innerNavController)
@@ -140,16 +153,20 @@ fun MainScreen(navHostController: NavHostController) {
 
                 composable<Routes.SourceScreen>(
                     enterTransition = {
-                        slideInHorizontally(
-                            initialOffsetX = { it }, // slide in from right
-                            animationSpec = tween(1000)
+                        fadeIn(
+                            animationSpec = tween(
+                                durationMillis = 500,
+                                easing = LinearEasing
+                            )
                         )
                     },
-                    exitTransition = {
+                    popExitTransition = {
                         slideOutHorizontally(
-                            targetOffsetX = { -it },
-                            animationSpec = tween(500)
-                        )
+                            targetOffsetX = { it },
+                            animationSpec = tween(
+                                durationMillis = 500,
+                                easing = FastOutSlowInEasing
+                            )                        )
                     }
                 ) {
                     SourceScreen(innerNavController)
