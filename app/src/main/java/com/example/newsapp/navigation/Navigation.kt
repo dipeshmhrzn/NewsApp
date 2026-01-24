@@ -11,6 +11,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.newsapp.presentation.ProfileScreen
+import com.example.newsapp.presentation.SearchScreen
 import com.example.newsapp.presentation.auth.LoginScreen
 import com.example.newsapp.presentation.auth.SignUpScreen
 import com.example.newsapp.presentation.mainscreen.AllTopHeadlineScreen
@@ -196,6 +197,28 @@ fun Navigation() {
             }
         ) {
             ProfileScreen()
+        }
+
+        composable<Routes.SearchScreen>(
+            enterTransition = {
+                fadeIn(
+                    animationSpec = tween(
+                        durationMillis = 500,
+                        easing = LinearEasing
+                    )
+                )
+            },
+            popExitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { it },
+                    animationSpec = tween(
+                        durationMillis = 500,
+                        easing = FastOutSlowInEasing
+                    )
+                )
+            }
+        ) {
+            SearchScreen()
         }
 
     }

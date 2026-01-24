@@ -77,7 +77,10 @@ fun MainScreen(navHostController: NavHostController) {
 
                 TopAppBar(
                     title = topBarTitle,
-                    onSearchClick = {},
+                    onSearchClick = {
+                        navHostController.navigate(Routes.SearchScreen)
+
+                    },
                     onProfileClick = {
                         navHostController.navigate(Routes.ProfileScreen)
                     }

@@ -38,4 +38,7 @@ sealed class Routes {
     @Serializable
     data object ProfileScreen : Routes()
 
+    @Serializable
+    data object SearchScreen : Routes()
+
 }
