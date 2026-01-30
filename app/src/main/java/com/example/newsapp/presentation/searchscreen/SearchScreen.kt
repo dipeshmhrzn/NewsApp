@@ -1,8 +1,7 @@
-package com.example.newsapp.presentation
+package com.example.newsapp.presentation.searchscreen
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -21,7 +20,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -37,15 +35,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.newsapp.domain.util.Result
-import com.example.newsapp.presentation.mainscreen.NewsViewModel
-import com.example.newsapp.presentation.mainscreen.components.TopHeadLinesCard
-import com.example.newsapp.presentation.mainscreen.getRelativeTime
-import com.example.newsapp.presentation.mainscreen.openWebsite
+import com.example.newsapp.presentation.mainscreen.homescreen.components.NewsCard
+import com.example.newsapp.presentation.utils.getRelativeTime
+import com.example.newsapp.presentation.utils.openWebsite
+import com.example.newsapp.presentation.utils.shareUrl
+import com.example.newsapp.presentation.viewmodels.NewsViewModel
 import com.example.newsapp.ui.theme.InterDisplay
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -146,16 +144,17 @@ fun SearchScreen(
                         Box(
                             modifier = Modifier.padding(8.dp)
                         ) {
-                            TopHeadLinesCard(
-                                screenWidth = screenWidth,
+                            NewsCard(
+                                urlToImage = article.urlToImage,
+                                title = article.title,
+                                sourceName = article.source.name,
                                 onCardClick = {
                                     openWebsite(context, article.url)
                                 },
-                                onMenuClick = {},
-                                urlToImage = article.urlToImage,
-                                author = article.author ?: "",
-                                title = article.title,
-                                sourceName = article.source.name,
+                                onShareClick = {
+                                    shareUrl(context, article.url)
+                                },
+                                onBookmarkClick = {},
                                 publishedAt = getRelativeTime(article.publishedAt)
                             )
                         }

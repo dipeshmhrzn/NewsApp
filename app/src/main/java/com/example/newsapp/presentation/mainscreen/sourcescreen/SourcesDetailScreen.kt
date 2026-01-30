@@ -1,4 +1,4 @@
-package com.example.newsapp.presentation
+package com.example.newsapp.presentation.mainscreen.sourcescreen
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -32,9 +32,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.newsapp.domain.util.Result
-import com.example.newsapp.presentation.mainscreen.NewsViewModel
-import com.example.newsapp.presentation.mainscreen.getRelativeTime
-import com.example.newsapp.presentation.mainscreen.openWebsite
+import com.example.newsapp.presentation.viewmodels.NewsViewModel
+import com.example.newsapp.presentation.mainscreen.sourcescreen.components.SourceNewsCard
+import com.example.newsapp.presentation.utils.getRelativeTime
+import com.example.newsapp.presentation.utils.openWebsite
 import com.example.newsapp.ui.theme.PlayFairDisplay
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -120,7 +121,7 @@ fun SourcesDetailScreen(
                                 onCardClick = {
                                     openWebsite(context, article.url)
                                 },
-                                onMenuClick = {  },
+                                onMenuClick = { },
                                 urlToImage = article.urlToImage,
                                 author = article.author ?: "",
                                 title = article.title,

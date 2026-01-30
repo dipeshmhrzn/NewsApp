@@ -1,6 +1,7 @@
-package com.example.newsapp.presentation
+package com.example.newsapp.presentation.mainscreen.homescreen.components
 
 import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.Intent
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -35,6 +36,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
@@ -44,12 +46,14 @@ import coil3.request.crossfade
 import com.example.newsapp.ui.theme.InterDisplay
 
 @Composable
-fun SourceNewsCard(
+fun TopHeadLinesCard(
+    screenWidth: Dp,
     onCardClick: () -> Unit,
     onMenuClick: () -> Unit,
     urlToImage: String?,
     author: String,
     title: String,
+    sourceName: String,
     publishedAt: String
 ) {
 
@@ -57,10 +61,12 @@ fun SourceNewsCard(
 
     val topMetaText = when {
         author.isNotBlank() -> author
+        sourceName.isNotBlank() -> sourceName
         else -> ""
     }
 
     val showTopMeta = topMetaText.isNotBlank()
+    val showBottomSource = author.isNotBlank()
 
     Box(
         modifier = Modifier
@@ -70,7 +76,7 @@ fun SourceNewsCard(
             }) {
         Column(
             modifier = Modifier
-                .fillMaxWidth()
+                .width(screenWidth)
                 .padding(8.dp)
         ) {
 
@@ -111,25 +117,25 @@ fun SourceNewsCard(
                 }
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-            Text(
-                text = topMetaText,
-                fontSize = 18.sp,
-                maxLines = 1,
-                fontFamily = InterDisplay,
-                fontWeight = FontWeight.Normal,
-                color = Color(0xFF4E4B66),
-                modifier = Modifier.alpha(if (showTopMeta) 1f else 0f)
+                Text(
+                    text = topMetaText,
+                    fontSize = 18.sp,
+                    maxLines = 1,
+                    fontFamily = InterDisplay,
+                    fontWeight = FontWeight.Normal,
+                    color = Color(0xFF4E4B66),
+                    modifier = Modifier.alpha(if (showTopMeta) 1f else 0f)
 
-            )
+                )
 
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
                 text = title,
-                maxLines = 3,
-                minLines = 1,
+                maxLines = 2,
+                minLines = 2,
                 overflow = TextOverflow.Ellipsis,
                 fontSize = 20.sp,
                 fontFamily = InterDisplay,
@@ -141,6 +147,18 @@ fun SourceNewsCard(
             Row(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
+                if (showBottomSource) {
+                    Text(
+                        text = sourceName,
+                        fontSize = 16.sp,
+                        fontFamily = InterDisplay,
+                        fontWeight = FontWeight.Medium,
+                        color = Color(0xFF737373)
+                    )
+
+                    Spacer(modifier = Modifier.width(10.dp))
+                }
+
                 Icon(
                     imageVector = Icons.Default.AccessTime,
                     contentDescription = null,
@@ -178,57 +196,5 @@ fun SourceNewsCard(
             }
         }
 
-    }
-}
-
-@Composable
-fun ShareHandler(
-    url: String, content: @Composable (onShare: () -> Unit) -> Unit
-) {
-    val context = LocalContext.current
-
-    val shareLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { }
-
-    content {
-        val intent = Intent(Intent.ACTION_SEND).apply {
-            type = "text/plain"
-            putExtra(Intent.EXTRA_TEXT, url)
-        }
-
-        shareLauncher.launch(
-            Intent.createChooser(intent, "Share via")
-        )
-    }
-}
-
-@Composable
-fun OpenWebsiteHandler(
-    url: String, content: @Composable (onRedirect: () -> Unit) -> Unit
-) {
-
-    val context = LocalContext.current
-
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { }
-
-    content {
-        val builder = CustomTabsIntent.Builder().apply {
-            setShowTitle(true)
-            setInstantAppsEnabled(true)
-        }
-        val customTabsIntent = builder.build()
-        try {
-            customTabsIntent.launchUrl(context, url.toUri())
-        } catch (e: ActivityNotFoundException) {
-            try {
-                val fallbackIntent = Intent(Intent.ACTION_VIEW, url.toUri())
-                context.startActivity(fallbackIntent)
-            } catch (ex: Exception) {
-                Toast.makeText(context, "No browser found to open link", Toast.LENGTH_SHORT).show()
-            }
-        }
     }
 }

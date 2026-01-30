@@ -5,7 +5,6 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
-import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
@@ -42,7 +41,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -50,8 +48,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.newsapp.navigation.Routes
+import com.example.newsapp.presentation.mainscreen.followingscreen.FollowingScreen
 import com.example.newsapp.presentation.mainscreen.components.BottomBar
 import com.example.newsapp.presentation.mainscreen.components.TopAppBar
+import com.example.newsapp.presentation.mainscreen.homescreen.HomeScreen
+import com.example.newsapp.presentation.mainscreen.sourcescreen.SourceScreen
+import com.example.newsapp.presentation.viewmodels.NewsViewModel
 import com.example.newsapp.ui.theme.InterDisplay
 
 @Composable

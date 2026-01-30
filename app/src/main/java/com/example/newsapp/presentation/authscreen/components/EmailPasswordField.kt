@@ -1,4 +1,4 @@
-package com.example.newsapp.presentation.auth.components
+package com.example.newsapp.presentation.authscreen.components
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth

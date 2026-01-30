@@ -1,12 +1,14 @@
-package com.example.newsapp.presentation.auth
+package com.example.newsapp.presentation.authscreen
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -15,22 +17,25 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.newsapp.navigation.Routes
-import com.example.newsapp.presentation.auth.components.CustomBottomText
-import com.example.newsapp.presentation.auth.components.CustomButton
-import com.example.newsapp.presentation.auth.components.EmailPasswordField
-import com.example.newsapp.presentation.auth.components.SocialSignInOptions
+import com.example.newsapp.presentation.authscreen.components.CustomBottomText
+import com.example.newsapp.presentation.authscreen.components.CustomButton
+import com.example.newsapp.presentation.authscreen.components.EmailPasswordField
+import com.example.newsapp.presentation.authscreen.components.SocialSignInOptions
 import com.example.newsapp.ui.theme.InterDisplay
 import com.example.newsapp.ui.theme.NewsAppTheme
 import com.example.newsapp.ui.theme.PlayFairDisplay
 
 @Composable
-fun SignUpScreen(navHostController: NavHostController) {
+fun LoginScreen(
+    navHostController: NavHostController
+) {
     Scaffold(
         containerColor = Color(0xFFFFFFFF)
     ) { innerPadding ->
@@ -49,18 +54,23 @@ fun SignUpScreen(navHostController: NavHostController) {
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "Hello!",
+                text = "Hello",
+                fontSize = 50.sp,
+                fontFamily = PlayFairDisplay,
+                fontWeight = FontWeight.Bold,
+            )
+            Text(
+                text = "Again!",
                 fontSize = 50.sp,
                 fontFamily = PlayFairDisplay,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF0295F6)
-
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "Signup to get Started",
+                text = "Welcome back you’ve\nbeen missed",
                 fontSize = 24.sp,
                 fontFamily = InterDisplay,
                 fontWeight = FontWeight.Normal,
@@ -79,11 +89,30 @@ fun SignUpScreen(navHostController: NavHostController) {
                 onPasswordVisibilityChange = { passwordVisible = !passwordVisible }
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(6.dp))
+
+            TextButton(onClick = {}) {
+                Text(
+                    text = "Forgot the password ?",
+                    modifier = Modifier.fillMaxWidth(),
+                    fontSize = 16.sp,
+                    fontFamily = InterDisplay,
+                    fontWeight = FontWeight.Normal,
+                    lineHeight = 30.sp,
+                    color = Color(0xFF0295F6),
+                    textAlign = TextAlign.End
+                )
+            }
 
             CustomButton(
-                onButtonClick = {},
-                buttonText = "Sign Up"
+                onButtonClick = {
+                    navHostController.navigate(Routes.MainScreen){
+                        popUpTo(Routes.LoginScreen){
+                            inclusive=true
+                        }
+                    }
+                },
+                buttonText = "Login"
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -95,27 +124,23 @@ fun SignUpScreen(navHostController: NavHostController) {
             Spacer(modifier = Modifier.height(16.dp))
 
             CustomBottomText(
-                text1 = "Already have an account ? ",
-                text2 = "Login",
+                text1 = "Don’t have an account? ",
+                text2 = "Sign Up",
                 onTextClick = {
-                    navHostController.navigate(Routes.LoginScreen) {
-                        popUpTo(Routes.SignUpScreen) {
-                            inclusive = true
-                        }
-                        launchSingleTop = true
-                    }
+                    navHostController.navigate(Routes.SignUpScreen)
                 }
             )
 
         }
+
+
     }
 }
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-private fun SignUpScreenPreview() {
-
+private fun LoginScreenPreview() {
     NewsAppTheme {
-        SignUpScreen(rememberNavController())
+        LoginScreen(rememberNavController())
     }
 }

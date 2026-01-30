@@ -4,7 +4,6 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
-import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -13,17 +12,15 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.toRoute
 import com.example.newsapp.domain.util.Result
-import com.example.newsapp.presentation.ProfileScreen
-import com.example.newsapp.presentation.SearchScreen
-import com.example.newsapp.presentation.SourcesDetailScreen
-import com.example.newsapp.presentation.auth.LoginScreen
-import com.example.newsapp.presentation.auth.SignUpScreen
-import com.example.newsapp.presentation.mainscreen.AllTopHeadlineScreen
+import com.example.newsapp.presentation.profilescreen.ProfileScreen
+import com.example.newsapp.presentation.searchscreen.SearchScreen
+import com.example.newsapp.presentation.mainscreen.sourcescreen.SourcesDetailScreen
+import com.example.newsapp.presentation.authscreen.LoginScreen
+import com.example.newsapp.presentation.authscreen.SignUpScreen
+import com.example.newsapp.presentation.mainscreen.homescreen.AllTopHeadlineScreen
 import com.example.newsapp.presentation.mainscreen.MainScreen
-import com.example.newsapp.presentation.mainscreen.NewsDetailScreen
-import com.example.newsapp.presentation.mainscreen.NewsViewModel
+import com.example.newsapp.presentation.viewmodels.NewsViewModel
 import com.example.newsapp.presentation.onboardingscreen.OnBoardingScreen
 import com.example.newsapp.presentation.splashscreen.SplashScreen
 
@@ -172,29 +169,6 @@ fun Navigation() {
                 articles = articles
             )
         }
-
-        composable<Routes.NewsDetailScreen>(
-            enterTransition = {
-                fadeIn(
-                    animationSpec = tween(
-                        durationMillis = 500,
-                        easing = LinearEasing
-                    )
-                )
-            },
-            popExitTransition = {
-                slideOutHorizontally(
-                    targetOffsetX = { it },
-                    animationSpec = tween(
-                        durationMillis = 500,
-                        easing = FastOutSlowInEasing
-                    )
-                )
-            }
-        ) {
-            NewsDetailScreen(navController)
-        }
-
 
         composable<Routes.ProfileScreen>(
             enterTransition = {

@@ -1,12 +1,5 @@
-package com.example.newsapp.presentation.mainscreen
+package com.example.newsapp.presentation.mainscreen.homescreen
 
-import android.content.ActivityNotFoundException
-import android.content.Context
-import android.content.Intent
-import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -42,16 +35,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import androidx.core.net.toUri
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.newsapp.domain.util.Result
-import com.example.newsapp.presentation.mainscreen.components.NewsCard
-import com.example.newsapp.presentation.mainscreen.components.TopHeadLinesCard
+import com.example.newsapp.presentation.mainscreen.homescreen.components.NewsCard
+import com.example.newsapp.presentation.mainscreen.homescreen.components.TopHeadLinesCard
+import com.example.newsapp.presentation.utils.getRelativeTime
+import com.example.newsapp.presentation.utils.openWebsite
+import com.example.newsapp.presentation.utils.shareUrl
+import com.example.newsapp.presentation.viewmodels.NewsViewModel
 import com.example.newsapp.ui.theme.InterDisplay
 import com.example.newsapp.ui.theme.PlayFairDisplay
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
 
 @Composable
 fun HomeScreen(
@@ -204,6 +196,10 @@ fun HomeScreen(
                             onCardClick = {
                                 openWebsite(context,item.url)
                             },
+                            onShareClick = {
+                                shareUrl(context,item.url)
+                            },
+                            onBookmarkClick = {},
                             publishedAt = getRelativeTime(item.publishedAt)
                         )
                     }
@@ -214,55 +210,5 @@ fun HomeScreen(
 
             }
         }
-    }
-}
-
-
-fun openWebsite(context: Context, url: String) {
-    val customTabsIntent = CustomTabsIntent.Builder()
-        .setShowTitle(true)
-        .setInstantAppsEnabled(true)
-        .build()
-
-    try {
-        customTabsIntent.launchUrl(context, url.toUri())
-    } catch (e: ActivityNotFoundException) {
-        try {
-            val fallbackIntent = Intent(Intent.ACTION_VIEW, url.toUri())
-            context.startActivity(fallbackIntent)
-        } catch (ex: Exception) {
-            Toast
-                .makeText(context, "No browser found to open link", Toast.LENGTH_SHORT)
-                .show()
-        }
-    }
-}
-
-fun getRelativeTime(publishedAt: String): String {
-    return try {
-        // Parse the API timestamp (UTC)
-        val publishedDateTime =
-            ZonedDateTime.parse(publishedAt, DateTimeFormatter.ISO_ZONED_DATE_TIME)
-
-        // Get current time in UTC
-        val now = ZonedDateTime.now(java.time.ZoneOffset.UTC)
-
-        val years = ChronoUnit.YEARS.between(publishedDateTime, now)
-        val months = ChronoUnit.MONTHS.between(publishedDateTime, now)
-        val days = ChronoUnit.DAYS.between(publishedDateTime, now)
-        val hours = ChronoUnit.HOURS.between(publishedDateTime, now)
-        val minutes = ChronoUnit.MINUTES.between(publishedDateTime, now)
-
-        // Determine relative time
-        when {
-            years > 0 -> "${years}y ago"
-            months > 0 -> "${months}mo ago"
-            days > 0 -> "${days}d ago"
-            hours > 0 -> "${hours}h ago"
-            minutes > 0 -> "${minutes}m ago"
-            else -> "Just now"
-        }
-    } catch (e: Exception) {
-        "" // fallback if parsing fails
     }
 }

@@ -1,4 +1,4 @@
-package com.example.newsapp.presentation.mainscreen.components
+package com.example.newsapp.presentation.mainscreen.homescreen.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Share
@@ -34,16 +33,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil3.compose.AsyncImage
 import coil3.compose.SubcomposeAsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
-import com.example.newsapp.R
 import com.example.newsapp.ui.theme.InterDisplay
 
 @Composable
 fun NewsCard(
     onCardClick: () -> Unit,
+    onShareClick:()->Unit,
+    onBookmarkClick:()->Unit,
     urlToImage: String?,
     title: String,
     sourceName: String,
@@ -153,7 +152,9 @@ fun NewsCard(
                 Box(
                     modifier = Modifier
                         .clip(shape = RoundedCornerShape(6.dp))
-                        .clickable {}
+                        .clickable {
+                            onShareClick()
+                        }
                         .padding(4.dp),
                 ) {
                     Icon(
@@ -167,7 +168,9 @@ fun NewsCard(
                 Box(
                     modifier = Modifier
                         .clip(shape = RoundedCornerShape(6.dp))
-                        .clickable {}
+                        .clickable {
+                            onBookmarkClick()
+                        }
                         .padding(4.dp),
                 ) {
                     Icon(

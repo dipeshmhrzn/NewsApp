@@ -1,4 +1,4 @@
-package com.example.newsapp.presentation.mainscreen
+package com.example.newsapp.presentation.mainscreen.followingscreen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -19,7 +19,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
-import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -28,19 +27,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.IntRect
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
-import com.example.newsapp.presentation.mainscreen.components.NewsCard
+import com.example.newsapp.presentation.mainscreen.homescreen.components.NewsCard
+import com.example.newsapp.presentation.utils.shareUrl
 import com.example.newsapp.ui.theme.InterDisplay
-import com.example.newsapp.ui.theme.NewsAppTheme
-import com.example.newsapp.ui.theme.PlayFairDisplay
 
 @Composable
 fun FollowingScreen(navHostController: NavHostController) {
+
+    val context= LocalContext.current
 
     LazyColumn(
         modifier = Modifier
@@ -132,7 +130,11 @@ fun FollowingScreen(navHostController: NavHostController) {
                             urlToImage = "https://i0.wp.com/9to5mac.com/wp-content/uploads/sites/6/2025/09/Apple-Store-iPhone-16-MagSafe.jpeg?resize=1200%2C628&quality=82&strip=all&ssl=1",
                             title = "Apple won’t sell you its in-store display accessories, but you can buy them here",
                             sourceName = "9to5Mac",
-                            publishedAt = "5h ago"
+                            publishedAt = "5h ago",
+                            onShareClick = {
+                                shareUrl(context , "google.com")
+                            },
+                            onBookmarkClick = {}
                         )
                         Spacer(modifier = Modifier.height(10.dp))
                     }

@@ -1,4 +1,4 @@
-package com.example.newsapp.presentation.mainscreen
+package com.example.newsapp.presentation.mainscreen.homescreen
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
@@ -23,7 +23,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.newsapp.data.dto.topheadlines.Article
-import com.example.newsapp.presentation.mainscreen.components.TopHeadLinesCard
+import com.example.newsapp.presentation.mainscreen.homescreen.components.TopHeadLinesCard
+import com.example.newsapp.presentation.utils.getRelativeTime
+import com.example.newsapp.presentation.utils.openWebsite
 import com.example.newsapp.ui.theme.PlayFairDisplay
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -1,4 +1,4 @@
-package com.example.newsapp.presentation.mainscreen
+package com.example.newsapp.presentation.mainscreen.sourcescreen
 
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -25,8 +25,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.newsapp.domain.util.Result
 import com.example.newsapp.navigation.Routes
-import com.example.newsapp.presentation.mainscreen.components.NewsCard
-import com.example.newsapp.presentation.mainscreen.components.SourceCard
+import com.example.newsapp.presentation.mainscreen.sourcescreen.components.SourceCard
+import com.example.newsapp.presentation.viewmodels.NewsViewModel
 import com.example.newsapp.ui.theme.InterDisplay
 
 @Composable
@@ -86,8 +86,13 @@ fun SourceScreen(
                                     SourceCard(
                                         source = source.name,
                                         onSourceClick = {
-                                            Toast.makeText(context, source.id, Toast.LENGTH_SHORT).show()
-                                            navHostController.navigate(Routes.SourcesDetailScreen(sourceId = source.id))
+                                            Toast.makeText(context, source.id, Toast.LENGTH_SHORT)
+                                                .show()
+                                            navHostController.navigate(
+                                                Routes.SourcesDetailScreen(
+                                                    sourceId = source.id
+                                                )
+                                            )
                                         }
                                     )
                                 }

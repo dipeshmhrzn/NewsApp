@@ -5,10 +5,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.example.newsapp.navigation.Navigation
-import com.example.newsapp.presentation.auth.LoginScreen
-import com.example.newsapp.presentation.onboardingscreen.OnBoardingScreen
-import com.example.newsapp.presentation.onboardingscreen.components.OnboardingPager
-import com.example.newsapp.presentation.splashscreen.SplashScreen
 import com.example.newsapp.ui.theme.NewsAppTheme
 import dagger.hilt.android.AndroidEntryPoint
 
