@@ -44,6 +44,9 @@ import coil3.compose.SubcomposeAsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.example.newsapp.ui.theme.InterDisplay
+import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.material.placeholder
+import com.google.accompanist.placeholder.shimmer
 
 @Composable
 fun TopHeadLinesCard(
@@ -89,16 +92,18 @@ fun TopHeadLinesCard(
                     .height(150.dp)
                     .clip(RoundedCornerShape(8.dp)),
                 loading = {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp),
-                            strokeWidth = 2.dp
-                        )
-
-                    }
+                    Spacer(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(150.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .placeholder(
+                                true,
+                                highlight = PlaceholderHighlight.shimmer(
+                                    highlightColor = Color(0xFF737373).copy(alpha = .1f)
+                                )
+                            )
+                    )
                 },
                 error = {
                     Box(

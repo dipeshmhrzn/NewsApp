@@ -17,6 +17,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.coroutines.cancellation.CancellationException
+import kotlinx.coroutines.isActive
+
 
 @HiltViewModel
 class NewsViewModel @Inject constructor(
@@ -42,7 +45,11 @@ class NewsViewModel @Inject constructor(
     private val _newsBySources = MutableStateFlow<Result<List<Article>>>(Result.Idle)
     val newsBySources = _newsBySources.asStateFlow()
 
-    private var cachedArticles: List<Article>? = null
+    private var cachedTopHeadlines: List<Article>? = null
+    private val cachedCategoryNews = mutableMapOf<String, List<Article>>()
+    private val cachedSourcesByCategory = mutableMapOf<String, List<Source>>()
+    private val cachedNewsBySources = mutableMapOf<String, List<Article>>()
+    private var cachedSearchResults: List<Article>? = null
 
     private var searchJob: Job? = null
 
@@ -53,98 +60,127 @@ class NewsViewModel @Inject constructor(
     }
 
     fun getTopHeadlines() {
-
-        if (!cachedArticles.isNullOrEmpty()) {
-            _newsState.value = Result.Success(cachedArticles!!)
+        cachedTopHeadlines?.let {
+            _newsState.value = Result.Success(it)
             return
         }
 
         viewModelScope.launch {
             _newsState.value = Result.Loading
-            val topHeadlines = getTopHeadlinesUseCase()
-            when (topHeadlines) {
+            val result = getTopHeadlinesUseCase()
+            _newsState.value = when (result) {
                 is Result.Success -> {
-                    _newsState.value = Result.Success(topHeadlines.data)
+                    cachedTopHeadlines = result.data
+                    Result.Success(result.data)
                 }
-
-                else -> {
-
-                }
+                is Result.Error -> Result.Error("Error fetching news")
+                else -> Result.Idle
             }
         }
     }
 
-    fun getNewsBySources(sourceId:String){
+    fun getNewsBySources(sourceId: String) {
+        cachedNewsBySources[sourceId]?.let {
+            _newsBySources.value = Result.Success(it)
+            return
+        }
+
         viewModelScope.launch {
             _newsBySources.value = Result.Loading
-            val newsBySources = getNewsBySourcesUseCase(sourceId)
-
-            when (newsBySources) {
+            val result = getNewsBySourcesUseCase(sourceId)
+            _newsBySources.value = when (result) {
                 is Result.Success -> {
-                    _newsBySources.value = Result.Success(newsBySources.data)
+                    cachedNewsBySources[sourceId] = result.data
+                    Result.Success(result.data)
                 }
-
-                else -> {
-
-                }
+                is Result.Error -> Result.Error("Error fetching news")
+                else -> Result.Idle
             }
         }
     }
 
     fun getCategoryNews(category: String) {
+        cachedCategoryNews[category]?.let {
+            _categoryNewsState.value = Result.Success(it)
+            return
+        }
+
         viewModelScope.launch {
             _categoryNewsState.value = Result.Loading
-            val categoryNews = getCategoryNewsUseCase(category)
-            when (categoryNews) {
+            val result = getCategoryNewsUseCase(category)
+            _categoryNewsState.value = when (result) {
                 is Result.Success -> {
-                    _categoryNewsState.value = Result.Success(categoryNews.data)
+                    cachedCategoryNews[category] = result.data
+                    Result.Success(result.data)
                 }
-
-                else -> {
-
-                }
+                is Result.Error -> Result.Error("Error fetching news")
+                else -> Result.Idle
             }
         }
     }
 
     fun getSources(category: String) {
+        cachedSourcesByCategory[category]?.let {
+            _sourcesByCategory.value = _sourcesByCategory.value + (category to Result.Success(it))
+            return
+        }
+
         viewModelScope.launch {
             _sourcesByCategory.value = _sourcesByCategory.value + (category to Result.Loading)
-
-            val sources = getSourcesUseCase(category.lowercase())
-            when (sources) {
+            val result = getSourcesUseCase(category.lowercase())
+            _sourcesByCategory.value = when (result) {
                 is Result.Success -> {
-                    _sourcesByCategory.value = _sourcesByCategory.value + (category to sources)
+                    cachedSourcesByCategory[category] = result.data
+                    _sourcesByCategory.value + (category to result)
                 }
-
-                else -> {
-
-                }
+                is Result.Error -> _sourcesByCategory.value + (category to result)
+                else -> _sourcesByCategory.value + (category to Result.Idle)
             }
         }
     }
 
-    fun searchProducts(query: String) {
-        // Cancel previous search job
+    fun searchNews(query: String) {
+        // Cancel any ongoing search job
         searchJob?.cancel()
 
+        // If query is blank, reset state
         if (query.isBlank()) {
             _searchState.value = Result.Idle
             return
         }
 
-        // Debounce search - wait 300ms before executing
         searchJob = viewModelScope.launch {
-            delay(300)
-            _searchState.value = Result.Loading
             try {
+                // Debounce: wait a little before sending search request
+                delay(400)
+
+                // Check if coroutine was cancelled during delay
+                if (!isActive) return@launch
+
+                // Set loading state
+                _searchState.value = Result.Loading
+
+                // Call the search use case
                 val result = searchNewsUseCase(query)
-                _searchState.value = result
+
+                // Update state only if coroutine still active
+                if (isActive) {
+                    _searchState.value = when (result) {
+                        is Result.Success -> Result.Success(result.data)
+                        is Result.Error -> Result.Error(result.message)
+                        else -> Result.Idle
+                    }
+                }
+
             } catch (e: Exception) {
-                _searchState.value = Result.Error(e.message ?: "Unknown error")
+                if (e !is CancellationException) {
+                    _searchState.value = Result.Error("Failed to search news.")
+                }
             }
         }
     }
+
+
 
     fun clearSearch() {
         searchJob?.cancel()

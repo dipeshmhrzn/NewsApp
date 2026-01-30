@@ -1,6 +1,7 @@
 package com.example.newsapp.presentation.mainscreen.homescreen
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -14,6 +15,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
@@ -66,28 +68,43 @@ fun AllTopHeadlineScreen(
         },
         containerColor = Color(0xFFFFFFFF)
     ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier.padding(paddingValues)
-        ) {
-            items(articles) { article ->
-                Box(
-                    modifier = Modifier.padding(8.dp)
-                ) {
-                    TopHeadLinesCard(
-                        screenWidth = screenWidth,
-                        onCardClick = {
-                            openWebsite(context, article.url)
-                        },
-                        onMenuClick = {},
-                        urlToImage = article.urlToImage,
-                        author = article.author ?: "",
-                        title = article.title,
-                        sourceName = article.source.name,
-                        publishedAt = getRelativeTime(article.publishedAt)
-                    )
+
+        if (articles.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "No articles available",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Normal,
+                )
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier.padding(paddingValues)
+            ) {
+                items(articles) { article ->
+                    Box(
+                        modifier = Modifier.padding(8.dp)
+                    ) {
+                        TopHeadLinesCard(
+                            screenWidth = screenWidth,
+                            onCardClick = {
+                                openWebsite(context, article.url)
+                            },
+                            onMenuClick = {},
+                            urlToImage = article.urlToImage,
+                            author = article.author ?: "",
+                            title = article.title,
+                            sourceName = article.source.name,
+                            publishedAt = getRelativeTime(article.publishedAt)
+                        )
+                    }
                 }
             }
-
         }
     }
 }

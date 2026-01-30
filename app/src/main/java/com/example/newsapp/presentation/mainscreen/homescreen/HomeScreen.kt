@@ -10,7 +10,9 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -37,6 +39,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.example.newsapp.domain.util.Result
 import com.example.newsapp.presentation.mainscreen.homescreen.components.NewsCard
+import com.example.newsapp.presentation.mainscreen.homescreen.components.ShimmeredNewsCard
+import com.example.newsapp.presentation.mainscreen.homescreen.components.ShimmeredTopHeadlineCard
 import com.example.newsapp.presentation.mainscreen.homescreen.components.TopHeadLinesCard
 import com.example.newsapp.presentation.utils.getRelativeTime
 import com.example.newsapp.presentation.utils.openWebsite
@@ -44,6 +48,9 @@ import com.example.newsapp.presentation.utils.shareUrl
 import com.example.newsapp.presentation.viewmodels.NewsViewModel
 import com.example.newsapp.ui.theme.InterDisplay
 import com.example.newsapp.ui.theme.PlayFairDisplay
+import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.material.placeholder
+import com.google.accompanist.placeholder.shimmer
 
 @Composable
 fun HomeScreen(
@@ -127,8 +134,31 @@ fun HomeScreen(
                         }
                     }
 
-                    else -> {
+                    Result.Idle, Result.Loading -> {
+                        items(8){
+                            ShimmeredTopHeadlineCard(true)
+                        }
+                    }
 
+                    is Result.Error -> {
+                        items(5) {
+                            Box(
+                                modifier = Modifier
+                                    .width(cardWidth)
+                                    .padding(16.dp)
+                                    .height(150.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(Color(0xFF737373).copy(alpha = .1f)),
+                                contentAlignment = Alignment.Center
+                            ){
+                                Text(
+                                    text = state.message.toString(),
+                                    fontSize = 18.sp,
+                                    fontFamily = InterDisplay,
+                                    fontWeight = FontWeight.Normal,
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -206,8 +236,31 @@ fun HomeScreen(
                 }
             }
 
-            else -> {
+            Result.Idle, Result.Loading -> {
+                items(8){
+                    ShimmeredNewsCard(true)
+                }
+            }
 
+            is Result.Error -> {
+                items(8) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 16.dp, end = 16.dp, top = 16.dp)
+                            .height(100.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(Color(0xFF737373).copy(alpha = .1f)),
+                        contentAlignment = Alignment.Center
+                    ){
+                        Text(
+                            text = state.message.toString(),
+                            fontSize = 18.sp,
+                            fontFamily = InterDisplay,
+                            fontWeight = FontWeight.Normal,
+                        )
+                    }
+                }
             }
         }
     }

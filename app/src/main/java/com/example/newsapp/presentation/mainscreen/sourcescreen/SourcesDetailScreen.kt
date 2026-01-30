@@ -1,13 +1,18 @@
 package com.example.newsapp.presentation.mainscreen.sourcescreen
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.StarBorder
@@ -32,10 +37,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.newsapp.domain.util.Result
+import com.example.newsapp.presentation.mainscreen.homescreen.components.ShimmeredNewsCard
+import com.example.newsapp.presentation.mainscreen.homescreen.components.ShimmeredTopHeadlineCard
+import com.example.newsapp.presentation.mainscreen.sourcescreen.components.ShimmeredSourceNewsCard
 import com.example.newsapp.presentation.viewmodels.NewsViewModel
 import com.example.newsapp.presentation.mainscreen.sourcescreen.components.SourceNewsCard
 import com.example.newsapp.presentation.utils.getRelativeTime
 import com.example.newsapp.presentation.utils.openWebsite
+import com.example.newsapp.ui.theme.InterDisplay
 import com.example.newsapp.ui.theme.PlayFairDisplay
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -132,8 +141,31 @@ fun SourcesDetailScreen(
 
                 }
 
-                else -> {
+                Result.Idle, Result.Loading -> {
+                    items(8) {
+                        ShimmeredSourceNewsCard(true)
+                    }
+                }
 
+                is Result.Error -> {
+                    items(5) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                                .height(150.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(Color(0xFF737373).copy(alpha = .1f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = state.message.toString(),
+                                fontSize = 18.sp,
+                                fontFamily = InterDisplay,
+                                fontWeight = FontWeight.Normal,
+                            )
+                        }
+                    }
                 }
             }
 
