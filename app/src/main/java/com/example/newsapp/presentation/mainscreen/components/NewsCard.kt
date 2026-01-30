@@ -1,11 +1,13 @@
 package com.example.newsapp.presentation.mainscreen.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -17,6 +19,7 @@ import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -26,16 +29,29 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import coil3.compose.SubcomposeAsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 import com.example.newsapp.R
 import com.example.newsapp.ui.theme.InterDisplay
 
 @Composable
-fun NewsCard(onCardClick: () -> Unit) {
+fun NewsCard(
+    onCardClick: () -> Unit,
+    urlToImage: String?,
+    title: String,
+    sourceName: String,
+    publishedAt: String
+) {
+
+    val context = LocalContext.current
+
     Box(
         modifier = Modifier
             .clip(shape = RoundedCornerShape(10.dp))
@@ -56,7 +72,7 @@ fun NewsCard(onCardClick: () -> Unit) {
                 ) {
 
                     Text(
-                        text = "CNBC",
+                        text = sourceName,
                         fontSize = 16.sp,
                         fontFamily = InterDisplay,
                         fontWeight = FontWeight.Medium,
@@ -66,7 +82,7 @@ fun NewsCard(onCardClick: () -> Unit) {
                     Spacer(modifier = Modifier.height(6.dp))
 
                     Text(
-                        text = "Stocks rebound from big sell-off after Trump rules out military action on Greenland: Live updates - CNBC",
+                        text = title,
                         maxLines = 3,
                         overflow = TextOverflow.Ellipsis,
                         fontSize = 20.sp,
@@ -76,14 +92,41 @@ fun NewsCard(onCardClick: () -> Unit) {
                 }
                 Spacer(modifier = Modifier.width(16.dp))
 
-                AsyncImage(
-                    model = R.drawable.onboarding1,
+                SubcomposeAsyncImage(
+                    model = ImageRequest.Builder(context).data(urlToImage).crossfade(true).build(),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .width(100.dp)
                         .height(100.dp)
-                        .clip(RoundedCornerShape(8.dp))
+                        .clip(RoundedCornerShape(8.dp)),
+                    loading = {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                strokeWidth = 2.dp
+                            )
+
+                        }
+                    },
+                    error = {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color(0xFFF5F5F5)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "No image",
+                                fontFamily = InterDisplay,
+                                fontSize = 12.sp
+                            )
+                        }
+
+                    }
                 )
             }
             Row(
@@ -99,14 +142,13 @@ fun NewsCard(onCardClick: () -> Unit) {
                     modifier = Modifier.size(20.dp)
                 )
                 Text(
-                    text = "4h ago",
+                    text = publishedAt,
                     fontSize = 16.sp,
                     fontFamily = InterDisplay,
                     fontWeight = FontWeight.Normal,
                     color = Color(0xFF4E4B66)
                 )
                 Spacer(modifier = Modifier.weight(1f))
-
 
                 Box(
                     modifier = Modifier
@@ -129,25 +171,10 @@ fun NewsCard(onCardClick: () -> Unit) {
                         .padding(4.dp),
                 ) {
                     Icon(
-                        imageVector = Icons.AutoMirrored.Filled.OpenInNew,
-                        contentDescription = null,
-                        tint = Color(0xFF4E4B66),
-                        modifier = Modifier.size(20.dp)
-
-                    )
-                }
-                Box(
-                    modifier = Modifier
-                        .clip(shape = RoundedCornerShape(6.dp))
-                        .clickable {}
-                        .padding(4.dp),
-                ) {
-                    Icon(
                         imageVector = Icons.Default.BookmarkBorder,
                         contentDescription = null,
                         tint = Color(0xFF4E4B66),
                         modifier = Modifier.size(20.dp)
-
                     )
                 }
             }

@@ -3,6 +3,7 @@ package com.example.newsapp.presentation.mainscreen
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -16,19 +17,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.example.newsapp.navigation.Routes
+import com.example.newsapp.data.dto.topheadlines.Article
 import com.example.newsapp.presentation.mainscreen.components.TopHeadLinesCard
 import com.example.newsapp.ui.theme.PlayFairDisplay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AllTopHeadlineScreen(navHostController: NavHostController) {
+fun AllTopHeadlineScreen(
+    navHostController: NavHostController,
+    articles: List<Article>
+) {
 
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val context = LocalContext.current
 
     Scaffold(
         topBar = {
@@ -61,18 +67,21 @@ fun AllTopHeadlineScreen(navHostController: NavHostController) {
         LazyColumn(
             modifier = Modifier.padding(paddingValues)
         ) {
-            items(20) {
+            items(articles) { article ->
                 Box(
                     modifier = Modifier.padding(8.dp)
                 ) {
                     TopHeadLinesCard(
-                        screenWidth,
+                        screenWidth = screenWidth,
                         onCardClick = {
-                            navHostController.navigate(Routes.NewsDetailScreen)
+                            openWebsite(context, article.url)
                         },
-                        onMenuClick = {
-
-                        }
+                        onMenuClick = {},
+                        urlToImage = article.urlToImage,
+                        author = article.author ?: "",
+                        title = article.title,
+                        sourceName = article.source.name,
+                        publishedAt = getRelativeTime(article.publishedAt)
                     )
                 }
             }

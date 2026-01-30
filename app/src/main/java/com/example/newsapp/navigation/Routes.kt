@@ -41,4 +41,7 @@ sealed class Routes {
     @Serializable
     data object SearchScreen : Routes()
 
+    @Serializable
+    data class SourcesDetailScreen(val sourceId: String) : Routes()
+
 }

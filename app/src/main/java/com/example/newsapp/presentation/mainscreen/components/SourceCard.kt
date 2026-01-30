@@ -39,7 +39,10 @@ import com.example.newsapp.ui.theme.NewsAppTheme
 import com.example.newsapp.ui.theme.PlayFairDisplay
 
 @Composable
-fun SourceCard() {
+fun SourceCard(
+    source: String,
+    onSourceClick: () -> Unit
+) {
 
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -52,12 +55,14 @@ fun SourceCard() {
                 color = Color(0xFF737373),
                 shape = RoundedCornerShape(10.dp)
             )
-            .clickable {}
+            .clickable {
+                onSourceClick()
+            }
             .padding(10.dp)
 
     ) {
         Text(
-            text = "ABC",
+            text = source,
             fontFamily = InterDisplay,
             fontSize = 18.sp
         )
@@ -81,13 +86,5 @@ fun SourceCard() {
                 tint = Color(0xFF737373)
             )
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun SourceCardPrev() {
-    NewsAppTheme {
-        SourceCard()
     }
 }

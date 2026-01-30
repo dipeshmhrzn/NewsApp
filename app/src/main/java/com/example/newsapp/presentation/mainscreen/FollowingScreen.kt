@@ -95,7 +95,7 @@ fun FollowingScreen(navHostController: NavHostController) {
                         modifier = Modifier
                             .fillMaxSize()
                             .clip(RoundedCornerShape(10.dp))
-                            .clickable{}
+                            .clickable {}
                             .padding(8.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically,
@@ -127,7 +127,13 @@ fun FollowingScreen(navHostController: NavHostController) {
                         }
                     }
                     repeat(2) {
-                        NewsCard(onCardClick = {})
+                        NewsCard(
+                            onCardClick = {},
+                            urlToImage = "https://i0.wp.com/9to5mac.com/wp-content/uploads/sites/6/2025/09/Apple-Store-iPhone-16-MagSafe.jpeg?resize=1200%2C628&quality=82&strip=all&ssl=1",
+                            title = "Apple won’t sell you its in-store display accessories, but you can buy them here",
+                            sourceName = "9to5Mac",
+                            publishedAt = "5h ago"
+                        )
                         Spacer(modifier = Modifier.height(10.dp))
                     }
 

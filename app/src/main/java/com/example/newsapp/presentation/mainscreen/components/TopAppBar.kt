@@ -36,13 +36,15 @@ fun TopAppBar(
             )
         },
         navigationIcon = {
-            IconButton(onClick = onSearchClick) {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = "Search",
-                    modifier = Modifier.size(28.dp)
+            if (title == "NewsApp") {
+                IconButton(onClick = onSearchClick) {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Search",
+                        modifier = Modifier.size(28.dp)
 
-                )
+                    )
+                }
             }
         },
         actions = {

@@ -42,6 +42,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -54,7 +55,10 @@ import com.example.newsapp.presentation.mainscreen.components.TopAppBar
 import com.example.newsapp.ui.theme.InterDisplay
 
 @Composable
-fun MainScreen(navHostController: NavHostController) {
+fun MainScreen(
+    navHostController: NavHostController,
+    newsViewModel: NewsViewModel
+) {
 
     val innerNavController = rememberNavController()
 
@@ -114,22 +118,18 @@ fun MainScreen(navHostController: NavHostController) {
                             animationSpec = tween(
                                 durationMillis = 500,
                                 easing = FastOutSlowInEasing
-                            )                        )
+                            )
+                        )
                     }
                 ) {
                     HomeScreen(
                         onSeeAll = {
                             navHostController.navigate(Routes.ALlTopHeadlineScreen)
                         },
-                        onHeadlineCardClick = {
-                            navHostController.navigate(Routes.NewsDetailScreen)
-                        },
-                        onNewsCardClick = {
-                            navHostController.navigate(Routes.NewsDetailScreen)
-                        },
                         onMenuClick = {
                             isMenuVisible = !isMenuVisible
                         },
+                        viewModel = newsViewModel
                     )
                 }
 
@@ -148,7 +148,8 @@ fun MainScreen(navHostController: NavHostController) {
                             animationSpec = tween(
                                 durationMillis = 500,
                                 easing = FastOutSlowInEasing
-                            )                        )
+                            )
+                        )
                     }
                 ) {
                     FollowingScreen(innerNavController)
@@ -169,10 +170,14 @@ fun MainScreen(navHostController: NavHostController) {
                             animationSpec = tween(
                                 durationMillis = 500,
                                 easing = FastOutSlowInEasing
-                            )                        )
+                            )
+                        )
                     }
                 ) {
-                    SourceScreen(innerNavController)
+                    SourceScreen(
+                        navHostController = navHostController,
+                        viewModel = newsViewModel
+                    )
                 }
 
             }
@@ -217,7 +222,8 @@ fun MainScreen(navHostController: NavHostController) {
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clip(shape = RoundedCornerShape(8.dp))
-                                    .clickable {}.padding(8.dp),
+                                    .clickable {}
+                                    .padding(8.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
@@ -243,7 +249,8 @@ fun MainScreen(navHostController: NavHostController) {
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clip(shape = RoundedCornerShape(8.dp))
-                                    .clickable {}.padding(8.dp),
+                                    .clickable {}
+                                    .padding(8.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
@@ -269,7 +276,8 @@ fun MainScreen(navHostController: NavHostController) {
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clip(shape = RoundedCornerShape(8.dp))
-                                    .clickable {}.padding(8.dp),
+                                    .clickable {}
+                                    .padding(8.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
