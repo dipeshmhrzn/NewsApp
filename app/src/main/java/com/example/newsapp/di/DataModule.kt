@@ -2,12 +2,15 @@ package com.example.newsapp.di
 
 import android.content.Context
 import com.example.newsapp.data.local.AuthDataStore
+import com.example.newsapp.data.local.FollowDataStore
 import com.example.newsapp.data.remote.NewsApiServices
 import com.example.newsapp.data.repositoryimpl.AuthDataStoreRepositoryImpl
 import com.example.newsapp.data.repositoryimpl.AuthRepositoryImpl
+import com.example.newsapp.data.repositoryimpl.FollowRepositoryImpl
 import com.example.newsapp.data.repositoryimpl.NewsRepositoryImpl
 import com.example.newsapp.domain.repository.AuthDataStoreRepository
 import com.example.newsapp.domain.repository.AuthRepository
+import com.example.newsapp.domain.repository.FollowRepository
 import com.example.newsapp.domain.repository.NewsRepository
 import com.google.firebase.auth.FirebaseAuth
 import dagger.Module
@@ -91,6 +94,20 @@ object DataModule {
     fun provideAuthDataStoreRepository(dataStore: AuthDataStore): AuthDataStoreRepository{
         return AuthDataStoreRepositoryImpl(dataStore)
     }
+
+    @Provides
+    @Singleton
+    fun provideFollowDataStore(@ApplicationContext context: Context): FollowDataStore{
+        return FollowDataStore(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideFollowDataStoreRepository(dataStore: FollowDataStore): FollowRepository{
+        return FollowRepositoryImpl(dataStore)
+    }
+
+
 
 
 }

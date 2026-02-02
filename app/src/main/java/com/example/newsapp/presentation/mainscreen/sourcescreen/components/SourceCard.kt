@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -19,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.newsapp.ui.theme.InterDisplay
@@ -26,7 +28,9 @@ import com.example.newsapp.ui.theme.InterDisplay
 @Composable
 fun SourceCard(
     source: String,
-    onSourceClick: () -> Unit
+    isFollowed: Boolean,
+    onSourceClick: () -> Unit,
+    onFollowClick:()->Unit
 ) {
 
     Row(
@@ -58,17 +62,22 @@ fun SourceCard(
                 .clip(shape = CircleShape)
                 .border(
                     width = 1.dp,
-                    color = Color(0xFF737373),
+                    color = if (isFollowed) Color.Black else Color(0xFF737373),
                     shape = CircleShape
                 )
-                .clickable {}
+                .clickable {
+                    onFollowClick()
+                }
                 .padding(3.dp),
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = Icons.Outlined.StarBorder,
+                imageVector = if (isFollowed)
+                    Icons.Filled.Star
+                else
+                    Icons.Outlined.StarBorder,
                 contentDescription = "Following",
-                tint = Color(0xFF737373)
+                tint = if (isFollowed) Color.Black else Color(0xFF737373)
             )
         }
     }

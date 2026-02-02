@@ -1,5 +1,6 @@
 package com.example.newsapp.presentation.mainscreen.sourcescreen
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,13 +27,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.newsapp.domain.util.Result
 import com.example.newsapp.navigation.Routes
 import com.example.newsapp.presentation.mainscreen.sourcescreen.components.SourceCard
+import com.example.newsapp.presentation.viewmodels.FollowViewModel
 import com.example.newsapp.presentation.viewmodels.NewsViewModel
 import com.example.newsapp.ui.theme.InterDisplay
 import com.google.accompanist.placeholder.PlaceholderHighlight
@@ -42,7 +46,8 @@ import com.google.accompanist.placeholder.shimmer
 @Composable
 fun SourceScreen(
     navHostController: NavHostController,
-    viewModel: NewsViewModel
+    viewModel: NewsViewModel,
+    followViewModel: FollowViewModel = hiltViewModel()
 ) {
 
     val newsCategories = listOf(
@@ -57,8 +62,13 @@ fun SourceScreen(
 
     val sourcesByCategory by viewModel.sourcesByCategory.collectAsState()
 
+    val context = LocalContext.current
+
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
 
+    val followedSourceIds by followViewModel
+        .followedSourceIds
+        .collectAsState()
 
     LaunchedEffect(Unit) {
         newsCategories.forEach { category ->
@@ -94,14 +104,24 @@ fun SourceScreen(
                         when (val state = sourcesByCategory[category]) {
                             is Result.Success -> {
                                 items(state.data) { source ->
+                                    val isFollowed = followedSourceIds.contains(source.id)
+
                                     SourceCard(
                                         source = source.name,
+                                        isFollowed = isFollowed,
                                         onSourceClick = {
                                             navHostController.navigate(
                                                 Routes.SourcesDetailScreen(
                                                     sourceId = source.id
                                                 )
                                             )
+                                        },
+                                        onFollowClick = {
+                                            if (isFollowed) {
+                                                followViewModel.unfollowSource(source.id)
+                                            } else {
+                                                followViewModel.followSource(source.id)
+                                            }
                                         }
                                     )
                                 }
