@@ -4,11 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.newsapp.data.dto.sources.Source
 import com.example.newsapp.data.dto.topheadlines.Article
-import com.example.newsapp.domain.usecase.GetCategoryNewsUseCase
-import com.example.newsapp.domain.usecase.GetNewsBySourcesUseCase
-import com.example.newsapp.domain.usecase.GetSourcesUseCase
-import com.example.newsapp.domain.usecase.GetTopHeadlineUseCase
-import com.example.newsapp.domain.usecase.SearchNewsUseCase
+import com.example.newsapp.domain.usecase.newsusecase.GetCategoryNewsUseCase
+import com.example.newsapp.domain.usecase.newsusecase.GetNewsBySourcesUseCase
+import com.example.newsapp.domain.usecase.newsusecase.GetSourcesUseCase
+import com.example.newsapp.domain.usecase.newsusecase.GetTopHeadlineUseCase
+import com.example.newsapp.domain.usecase.newsusecase.SearchNewsUseCase
 import com.example.newsapp.domain.util.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job

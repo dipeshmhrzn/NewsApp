@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -19,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.newsapp.R
@@ -26,12 +29,16 @@ import com.example.newsapp.ui.theme.InterDisplay
 
 @Composable
 fun EmailPasswordField(
-    email:String,
-    onEmailChange:(String)-> Unit,
+    email: String,
+    onEmailChange: (String) -> Unit,
     password: String,
     onPasswordChange: (String) -> Unit,
     passwordVisible: Boolean,
-    onPasswordVisibilityChange: () -> Unit
+    onPasswordVisibilityChange: () -> Unit,
+    emailSupportingText: String? = null,
+    passwordSupportingText: String? = null,
+    isEmailError: Boolean = false,
+    isPasswordError: Boolean = false,
 ) {
 
     Text(
@@ -47,9 +54,31 @@ fun EmailPasswordField(
         value = email,
         onValueChange = onEmailChange,
         modifier = Modifier
-            .fillMaxWidth()
-            .height(50.dp),
+            .fillMaxWidth(),
         singleLine = true,
+        isError = isEmailError,
+        supportingText = emailSupportingText?.let {
+            {
+                Text(
+                    text = it,
+                    color = Color.Red,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    fontSize = 14.sp,
+                    fontFamily = InterDisplay
+                )
+            }
+        },
+        trailingIcon = {
+            if (isEmailError) {
+                Icon(
+                    imageVector = Icons.Default.Warning,
+                    contentDescription = null,
+                    tint = Color.Red,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        },
         shape = RoundedCornerShape(10.dp),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
         colors = OutlinedTextFieldDefaults.colors(
@@ -77,22 +106,43 @@ fun EmailPasswordField(
         value = password,
         onValueChange = onPasswordChange,
         modifier = Modifier
-            .fillMaxWidth()
-            .height(50.dp),
+            .fillMaxWidth(),
         singleLine = true,
+        isError = isPasswordError,
+        supportingText = passwordSupportingText?.let {
+            {
+                Text(
+                    text = it,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    color = Color.Red,
+                    fontSize = 14.sp,
+                    fontFamily = InterDisplay
+                )
+            }
+        },
         shape = RoundedCornerShape(10.dp),
         trailingIcon = {
-            IconButton(
-                onClick = onPasswordVisibilityChange
-            ) {
+            if (isPasswordError) {
                 Icon(
-                    painter = if (passwordVisible) painterResource(R.drawable.ic_visibilty_on) else painterResource(
-                        R.drawable.ic_visibility_off
-                    ),
+                    imageVector = Icons.Default.Warning,
                     contentDescription = null,
-                    modifier = Modifier.size(22.dp),
-                    tint = Color(0xFF4E4B66)
+                    tint = Color.Red,
+                    modifier = Modifier.size(20.dp)
                 )
+            } else {
+                IconButton(
+                    onClick = onPasswordVisibilityChange
+                ) {
+                    Icon(
+                        painter = if (passwordVisible) painterResource(R.drawable.ic_visibilty_on) else painterResource(
+                            R.drawable.ic_visibility_off
+                        ),
+                        contentDescription = null,
+                        modifier = Modifier.size(22.dp),
+                        tint = Color(0xFF4E4B66)
+                    )
+                }
             }
         },
         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),

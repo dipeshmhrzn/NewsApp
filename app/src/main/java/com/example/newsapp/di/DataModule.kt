@@ -1,8 +1,11 @@
 package com.example.newsapp.di
 
 import com.example.newsapp.data.remote.NewsApiServices
+import com.example.newsapp.data.repositoryimpl.AuthRepositoryImpl
 import com.example.newsapp.data.repositoryimpl.NewsRepositoryImpl
+import com.example.newsapp.domain.repository.AuthRepository
 import com.example.newsapp.domain.repository.NewsRepository
+import com.google.firebase.auth.FirebaseAuth
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -22,6 +25,18 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object DataModule {
+
+    @Provides
+    @Singleton
+    fun provideFirebaseAuth(): FirebaseAuth{
+        return FirebaseAuth.getInstance()
+    }
+
+    @Provides
+    @Singleton
+    fun provideAuthRepository(firebaseAuth: FirebaseAuth): AuthRepository{
+        return AuthRepositoryImpl(firebaseAuth)
+    }
 
     @Provides
     @Singleton

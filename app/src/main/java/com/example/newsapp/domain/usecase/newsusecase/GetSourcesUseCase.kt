@@ -1,4 +1,4 @@
-package com.example.newsapp.domain.usecase
+package com.example.newsapp.domain.usecase.newsusecase
 
 import com.example.newsapp.data.dto.sources.Source
 import com.example.newsapp.domain.repository.NewsRepository

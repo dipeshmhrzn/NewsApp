@@ -43,7 +43,7 @@ import com.example.newsapp.ui.theme.NewsAppTheme
 @Composable
 fun ProfileScreen() {
     Scaffold(
-        containerColor = Color(0xFFE5E5E5)
+        containerColor = Color(0xFFFFFFFF)
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -99,7 +99,7 @@ fun ProfileScreen() {
                         .offset(x = (-2).dp, y = (-2).dp) // optional fine-tuning
                         .size(26.dp)
                         .clip(CircleShape)
-                        .background(Color.White)
+                        .background(Color(0xFFE5E5E5))
                         .clickable { },
                     contentAlignment = Alignment.Center
                 ) {
@@ -124,7 +124,7 @@ fun ProfileScreen() {
                     .fillMaxWidth()
                     .padding(16.dp)
                     .clip(RoundedCornerShape(30.dp))
-                    .background(Color(0xFFFFFFFF))
+                    .background(Color(0xFFE5E5E5).copy(.3f)),
             ) {
                 Column(
                     modifier = Modifier
@@ -191,7 +191,7 @@ fun ProfileScreen() {
                     .fillMaxWidth()
                     .padding(16.dp)
                     .clip(RoundedCornerShape(30.dp))
-                    .background(Color(0xFFFFFFFF))
+                    .background(Color(0xFFE5E5E5).copy(.3f))
                     .padding(10.dp)
             ) {
                 Row(
