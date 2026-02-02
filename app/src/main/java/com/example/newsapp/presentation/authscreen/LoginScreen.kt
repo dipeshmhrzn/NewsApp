@@ -21,12 +21,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.example.newsapp.domain.util.Result
 import com.example.newsapp.domain.util.ValidationErrors
 import com.example.newsapp.navigation.Routes
@@ -35,15 +33,16 @@ import com.example.newsapp.presentation.authscreen.components.CustomBottomText
 import com.example.newsapp.presentation.authscreen.components.CustomButton
 import com.example.newsapp.presentation.authscreen.components.EmailPasswordField
 import com.example.newsapp.presentation.authscreen.components.SocialSignInOptions
+import com.example.newsapp.presentation.viewmodels.AuthDataStoreViewModel
 import com.example.newsapp.presentation.viewmodels.AuthViewModel
 import com.example.newsapp.ui.theme.InterDisplay
-import com.example.newsapp.ui.theme.NewsAppTheme
 import com.example.newsapp.ui.theme.PlayFairDisplay
 
 @Composable
 fun LoginScreen(
     navHostController: NavHostController,
-    authViewModel: AuthViewModel = hiltViewModel()
+    authViewModel: AuthViewModel = hiltViewModel(),
+    authDataStoreViewModel: AuthDataStoreViewModel
 ) {
 
     var email by remember { mutableStateOf("") }

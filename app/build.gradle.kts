@@ -84,6 +84,7 @@ dependencies {
 
     implementation("com.google.accompanist:accompanist-placeholder-material:0.31.5-beta")
 
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
 
     implementation("io.coil-kt.coil3:coil-compose:3.0.3")
     implementation("io.coil-kt.coil3:coil-network-okhttp:3.0.3")

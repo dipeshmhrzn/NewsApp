@@ -1,14 +1,19 @@
 package com.example.newsapp.di
 
+import android.content.Context
+import com.example.newsapp.data.local.AuthDataStore
 import com.example.newsapp.data.remote.NewsApiServices
+import com.example.newsapp.data.repositoryimpl.AuthDataStoreRepositoryImpl
 import com.example.newsapp.data.repositoryimpl.AuthRepositoryImpl
 import com.example.newsapp.data.repositoryimpl.NewsRepositoryImpl
+import com.example.newsapp.domain.repository.AuthDataStoreRepository
 import com.example.newsapp.domain.repository.AuthRepository
 import com.example.newsapp.domain.repository.NewsRepository
 import com.google.firebase.auth.FirebaseAuth
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
@@ -73,6 +78,18 @@ object DataModule {
     @Singleton
     fun provideNewsRepository(newsApiServices: NewsApiServices): NewsRepository {
         return NewsRepositoryImpl(newsApiServices)
+    }
+
+    @Provides
+    @Singleton
+    fun provideAuthDataStore(@ApplicationContext context: Context): AuthDataStore{
+        return AuthDataStore(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideAuthDataStoreRepository(dataStore: AuthDataStore): AuthDataStoreRepository{
+        return AuthDataStoreRepositoryImpl(dataStore)
     }
 
 

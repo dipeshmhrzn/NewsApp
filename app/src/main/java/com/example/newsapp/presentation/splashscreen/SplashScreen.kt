@@ -1,5 +1,6 @@
 package com.example.newsapp.presentation.splashscreen
 
+import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
@@ -30,29 +31,34 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun SplashScreen(
-    navHostController: NavHostController
+    isLoading: Boolean,
+    onFinish: () -> Unit
 ) {
+
+    LaunchedEffect(isLoading) {
+        Log.d("SplashScreen", "isLoading: $isLoading")
+        if (!isLoading){
+            delay(1000)
+            onFinish()
+        }
+    }
+
+    var startAnimation by remember { mutableStateOf(false) }
+
+    val alpha by animateFloatAsState(
+        targetValue = if (startAnimation) 1f else 0f,
+        animationSpec = tween(durationMillis = 1200)
+    )
+
+    LaunchedEffect(Unit) {
+        delay(300)
+        startAnimation=true
+    }
+
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = Color(0xFFFFFFFF)
     ) {
-
-        var startAnimation by remember { mutableStateOf(false) }
-
-        val alpha by animateFloatAsState(
-            targetValue = if (startAnimation) 1f else 0f,
-            animationSpec = tween(durationMillis = 1200)
-        )
-
-        LaunchedEffect(Unit) {
-            delay(300)
-            startAnimation=true
-
-            delay(1200) // animation duration
-            navHostController.navigate(Routes.OnboardingScreen) {
-                popUpTo(Routes.SplashScreen) { inclusive = true }
-            }
-        }
 
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -67,14 +73,5 @@ fun SplashScreen(
             )
         }
 
-    }
-}
-
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-private fun SplashScreenPreview() {
-    NewsAppTheme {
-        SplashScreen(rememberNavController())
     }
 }

@@ -23,6 +23,7 @@ import com.example.newsapp.presentation.mainscreen.MainScreen
 import com.example.newsapp.presentation.viewmodels.NewsViewModel
 import com.example.newsapp.presentation.onboardingscreen.OnBoardingScreen
 import com.example.newsapp.presentation.splashscreen.SplashScreen
+import com.example.newsapp.presentation.viewmodels.AuthDataStoreViewModel
 
 @Composable
 fun Navigation() {
@@ -30,6 +31,10 @@ fun Navigation() {
 
     val newsViewModel: NewsViewModel = hiltViewModel()
     val newsState by newsViewModel.newsState.collectAsState()
+
+    val authDataStoreViewModel: AuthDataStoreViewModel = hiltViewModel()
+    val authDataStoreState by authDataStoreViewModel.authDataStoreState.collectAsState()
+
 
     NavHost(navController = navController, startDestination = Routes.SplashScreen) {
         composable<Routes.SplashScreen>(
@@ -45,7 +50,21 @@ fun Navigation() {
                 )
             }
         ) {
-            SplashScreen(navHostController = navController)
+            SplashScreen(
+                isLoading = authDataStoreState.isLoading,
+                onFinish = {
+                    val destination = when {
+                        authDataStoreState.isFirstTimeLogin -> Routes.OnboardingScreen
+                        authDataStoreState.isLoggedIn -> Routes.MainScreen
+                        else -> Routes.LoginScreen
+                    }
+                    navController.navigate(destination) {
+                        popUpTo(Routes.SplashScreen) {
+                            inclusive = true
+                        }
+                    }
+                }
+            )
         }
 
         composable<Routes.OnboardingScreen>(
@@ -67,7 +86,10 @@ fun Navigation() {
                 )
             }
         ) {
-            OnBoardingScreen(navHostController = navController)
+            OnBoardingScreen(
+                navHostController = navController,
+                authDataStoreViewModel = authDataStoreViewModel
+            )
         }
 
         composable<Routes.LoginScreen>(
@@ -89,7 +111,10 @@ fun Navigation() {
                 )
             }
         ) {
-            LoginScreen(navHostController = navController)
+            LoginScreen(
+                navHostController = navController,
+                authDataStoreViewModel = authDataStoreViewModel
+            )
 
         }
 

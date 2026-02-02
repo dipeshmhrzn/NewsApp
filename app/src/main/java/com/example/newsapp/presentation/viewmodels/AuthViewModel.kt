@@ -3,6 +3,7 @@ package com.example.newsapp.presentation.viewmodels
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.newsapp.domain.usecase.authdatastoreusecase.SetAuthDatastoreUseCase
 import com.example.newsapp.domain.usecase.authusecase.LoginUseCase
 import com.example.newsapp.domain.usecase.authusecase.SignOutUseCase
 import com.example.newsapp.domain.usecase.authusecase.SignupUseCase
@@ -19,7 +20,8 @@ import javax.inject.Inject
 class AuthViewModel @Inject constructor(
     private val loginUseCase: LoginUseCase,
     private val signupUseCase: SignupUseCase,
-    private val signOutUseCase: SignOutUseCase
+    private val signOutUseCase: SignOutUseCase,
+    private val setAuthDatastoreUseCase: SetAuthDatastoreUseCase
 ) : ViewModel() {
 
     private val _authState = MutableStateFlow<Result<String>>(Result.Idle)
@@ -40,6 +42,9 @@ class AuthViewModel @Inject constructor(
             _authState.value= Result.Loading
             delay(300)
             val result=loginUseCase(email,password)
+            if (result is Result.Success) {
+                    setAuthDatastoreUseCase.setLoggedIn(true)
+            }
             Log.d("AuthViewModel", "login: $result")
             _authState.value=result
         }

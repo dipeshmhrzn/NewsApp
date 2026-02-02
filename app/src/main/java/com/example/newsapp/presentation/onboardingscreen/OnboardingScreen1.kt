@@ -7,9 +7,13 @@ import com.example.newsapp.R
 import com.example.newsapp.navigation.Routes
 import com.example.newsapp.presentation.onboardingscreen.components.OnboardingItem
 import com.example.newsapp.presentation.onboardingscreen.components.OnboardingPager
+import com.example.newsapp.presentation.viewmodels.AuthDataStoreViewModel
 
 @Composable
-fun OnBoardingScreen(navHostController: NavHostController) {
+fun OnBoardingScreen(
+    navHostController: NavHostController,
+    authDataStoreViewModel: AuthDataStoreViewModel
+) {
     val items = listOf(
         OnboardingItem(
             image = R.drawable.onboarding1,
@@ -31,11 +35,13 @@ fun OnBoardingScreen(navHostController: NavHostController) {
     OnboardingPager(
         items = items,
         onNavigateToLoginScreen = {
+            authDataStoreViewModel.setFirstTimeLogin(false)
+
             navHostController.navigate(Routes.LoginScreen) {
                 popUpTo(Routes.OnboardingScreen) {
                     inclusive = true
                 }
             }
-        })
-
+        }
+    )
 }
