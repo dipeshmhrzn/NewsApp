@@ -49,7 +49,6 @@ class NewsViewModel @Inject constructor(
     private val cachedCategoryNews = mutableMapOf<String, List<Article>>()
     private val cachedSourcesByCategory = mutableMapOf<String, List<Source>>()
     private val cachedNewsBySources = mutableMapOf<String, List<Article>>()
-    private var cachedSearchResults: List<Article>? = null
 
     private var searchJob: Job? = null
 

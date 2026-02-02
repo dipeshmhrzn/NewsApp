@@ -15,6 +15,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -25,9 +29,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.newsapp.data.dto.topheadlines.Article
+import com.example.newsapp.presentation.mainscreen.components.MenuItems
 import com.example.newsapp.presentation.mainscreen.homescreen.components.TopHeadLinesCard
 import com.example.newsapp.presentation.utils.getRelativeTime
 import com.example.newsapp.presentation.utils.openWebsite
+import com.example.newsapp.presentation.utils.shareUrl
 import com.example.newsapp.ui.theme.PlayFairDisplay
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -40,71 +46,94 @@ fun AllTopHeadlineScreen(
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val context = LocalContext.current
 
-    Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        text = "Top Headlines",
-                        fontFamily = PlayFairDisplay,
-                        fontSize = 26.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = {
-                        navHostController.popBackStack()
-                    }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = null
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color(0xFFFFFFFF)
-                )
-            )
-        },
-        containerColor = Color(0xFFFFFFFF)
-    ) { paddingValues ->
+    var isMenuVisible by remember { mutableStateOf(false) }
+    var selectedArticle by remember { mutableStateOf<Article?>(null) }
 
-        if (articles.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "No articles available",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Normal,
-                )
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier.padding(paddingValues)
-            ) {
-                items(articles) { article ->
-                    Box(
-                        modifier = Modifier.padding(8.dp)
-                    ) {
-                        TopHeadLinesCard(
-                            screenWidth = screenWidth,
-                            onCardClick = {
-                                openWebsite(context, article.url)
-                            },
-                            onMenuClick = {},
-                            urlToImage = article.urlToImage,
-                            author = article.author ?: "",
-                            title = article.title,
-                            sourceName = article.source.name,
-                            publishedAt = getRelativeTime(article.publishedAt)
+    Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
+            topBar = {
+                CenterAlignedTopAppBar(
+                    title = {
+                        Text(
+                            text = "Top Headlines",
+                            fontFamily = PlayFairDisplay,
+                            fontSize = 26.sp,
+                            fontWeight = FontWeight.SemiBold
                         )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = {
+                            navHostController.popBackStack()
+                        }) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = null
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                        containerColor = Color(0xFFFFFFFF)
+                    )
+                )
+            },
+            containerColor = Color(0xFFFFFFFF)
+        ) { paddingValues ->
+
+            if (articles.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .padding(paddingValues)
+                        .fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "No articles available",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Normal,
+                    )
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.padding(paddingValues)
+                ) {
+                    items(articles) { article ->
+                        Box(
+                            modifier = Modifier.padding(8.dp)
+                        ) {
+                            TopHeadLinesCard(
+                                screenWidth = screenWidth,
+                                onCardClick = {
+                                    openWebsite(context, article.url)
+                                },
+                                onMenuClick = {
+                                    selectedArticle = article
+                                    isMenuVisible = !isMenuVisible
+                                },
+                                urlToImage = article.urlToImage,
+                                author = article.author ?: "",
+                                title = article.title,
+                                sourceName = article.source.name,
+                                publishedAt = getRelativeTime(article.publishedAt)
+                            )
+                        }
                     }
                 }
             }
+        }
+        if (isMenuVisible) {
+            MenuItems(
+                article = selectedArticle!!,
+                onDismiss = {
+                    isMenuVisible = false
+                },
+                onSaveClick = {},
+                onShareClick = { article ->
+                    shareUrl(context, article.url)
+                },
+                onRedirectClick = {article ->
+                    openWebsite(context, article.url)
+                }
+            )
         }
     }
 }

@@ -236,6 +236,7 @@ fun Navigation() {
             val sourceId = backStackEntry.arguments?.getString("sourceId") ?: ""
             SourcesDetailScreen(
                 sourceId = sourceId,
+                navHostController = navController,
                 viewModel = newsViewModel
             )
         }

@@ -37,6 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import com.example.newsapp.data.dto.topheadlines.Article
 import com.example.newsapp.domain.util.Result
 import com.example.newsapp.presentation.mainscreen.homescreen.components.NewsCard
 import com.example.newsapp.presentation.mainscreen.homescreen.components.ShimmeredNewsCard
@@ -55,7 +56,7 @@ import com.google.accompanist.placeholder.shimmer
 @Composable
 fun HomeScreen(
     onSeeAll: () -> Unit,
-    onMenuClick: () -> Unit,
+    onMenuClick: (item: Article) -> Unit,
     viewModel: NewsViewModel
 ) {
 
@@ -75,6 +76,7 @@ fun HomeScreen(
     )
 
     var selectedCategory by remember { mutableStateOf("Business") }
+
 
     val listState = rememberLazyListState()
 
@@ -123,7 +125,9 @@ fun HomeScreen(
                                     onCardClick = {
                                         openWebsite(context, item.url)
                                     },
-                                    onMenuClick = onMenuClick,
+                                    onMenuClick = {
+                                        onMenuClick(item)
+                                    },
                                     urlToImage = item.urlToImage,
                                     author = item.author ?: "",
                                     title = item.title,

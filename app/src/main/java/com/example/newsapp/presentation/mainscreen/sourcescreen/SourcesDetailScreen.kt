@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -27,6 +28,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,7 +40,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import com.example.newsapp.data.dto.topheadlines.Article
 import com.example.newsapp.domain.util.Result
+import com.example.newsapp.presentation.mainscreen.components.MenuItems
 import com.example.newsapp.presentation.mainscreen.homescreen.components.ShimmeredNewsCard
 import com.example.newsapp.presentation.mainscreen.homescreen.components.ShimmeredTopHeadlineCard
 import com.example.newsapp.presentation.mainscreen.sourcescreen.components.ShimmeredSourceNewsCard
@@ -44,6 +51,7 @@ import com.example.newsapp.presentation.viewmodels.NewsViewModel
 import com.example.newsapp.presentation.mainscreen.sourcescreen.components.SourceNewsCard
 import com.example.newsapp.presentation.utils.getRelativeTime
 import com.example.newsapp.presentation.utils.openWebsite
+import com.example.newsapp.presentation.utils.shareUrl
 import com.example.newsapp.ui.theme.InterDisplay
 import com.example.newsapp.ui.theme.PlayFairDisplay
 
@@ -51,6 +59,7 @@ import com.example.newsapp.ui.theme.PlayFairDisplay
 @Composable
 fun SourcesDetailScreen(
     sourceId: String,
+    navHostController: NavHostController,
     viewModel: NewsViewModel
 ) {
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
@@ -66,7 +75,10 @@ fun SourcesDetailScreen(
         is Result.Success -> state.data.firstOrNull()?.source?.name ?: "News"
         else -> "News"
     }
+    var isMenuVisible by remember { mutableStateOf(false) }
+    var selectedArticle by remember { mutableStateOf<Article?>(null) }
 
+    Box(modifier = Modifier.fillMaxSize()) {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -80,6 +92,7 @@ fun SourcesDetailScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = {
+                        navHostController.popBackStack()
                     }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -89,7 +102,7 @@ fun SourcesDetailScreen(
                 }, actions = {
                     Box(
                         modifier = Modifier
-                            .padding(end = 12.dp) // move closer to center
+                            .padding(end = 12.dp)
                             .size(32.dp)
                             .clip(shape = CircleShape)
                             .border(
@@ -130,7 +143,10 @@ fun SourcesDetailScreen(
                                 onCardClick = {
                                     openWebsite(context, article.url)
                                 },
-                                onMenuClick = { },
+                                onMenuClick = {
+                                    selectedArticle = article
+                                    isMenuVisible = !isMenuVisible
+                                },
                                 urlToImage = article.urlToImage,
                                 author = article.author ?: "",
                                 title = article.title,
@@ -171,5 +187,20 @@ fun SourcesDetailScreen(
 
         }
     }
+    if (isMenuVisible) {
+        MenuItems(
+            article = selectedArticle!!,
+            onDismiss = {
+                isMenuVisible = false
+            },
+            onSaveClick = {},
+            onShareClick = { article ->
+                shareUrl(context, article.url)
+            },
+            onRedirectClick = {article ->
+                openWebsite(context, article.url)
+            }
+        )
+    }}
 }
 

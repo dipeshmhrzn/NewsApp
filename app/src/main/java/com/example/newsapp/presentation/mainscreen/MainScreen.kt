@@ -38,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -47,12 +48,16 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.newsapp.data.dto.topheadlines.Article
 import com.example.newsapp.navigation.Routes
 import com.example.newsapp.presentation.mainscreen.followingscreen.FollowingScreen
 import com.example.newsapp.presentation.mainscreen.components.BottomBar
+import com.example.newsapp.presentation.mainscreen.components.MenuItems
 import com.example.newsapp.presentation.mainscreen.components.TopAppBar
 import com.example.newsapp.presentation.mainscreen.homescreen.HomeScreen
 import com.example.newsapp.presentation.mainscreen.sourcescreen.SourceScreen
+import com.example.newsapp.presentation.utils.openWebsite
+import com.example.newsapp.presentation.utils.shareUrl
 import com.example.newsapp.presentation.viewmodels.NewsViewModel
 import com.example.newsapp.ui.theme.InterDisplay
 
@@ -69,6 +74,9 @@ fun MainScreen(
 
     var isMenuVisible by remember { mutableStateOf(false) }
 
+    val context = LocalContext.current
+
+    var selectedArticle by remember { mutableStateOf<Article?>(null) }
 
     // Determine title based on current destination
     val topBarTitle = when {
@@ -128,7 +136,8 @@ fun MainScreen(
                         onSeeAll = {
                             navHostController.navigate(Routes.ALlTopHeadlineScreen)
                         },
-                        onMenuClick = {
+                        onMenuClick = { article ->
+                            selectedArticle = article
                             isMenuVisible = !isMenuVisible
                         },
                         viewModel = newsViewModel
@@ -185,127 +194,19 @@ fun MainScreen(
             }
         }
         if (isMenuVisible) {
-            Box(modifier = Modifier.fillMaxSize()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Gray.copy(alpha = 0.5f))
-                        .clickable { isMenuVisible = false }
-                )
-
-                AnimatedVisibility(
-                    visible = true,
-                    enter = slideInVertically(
-                        initialOffsetY = { it },
-                        animationSpec = tween(500)
-                    ),
-                    exit = slideOutVertically(
-                        targetOffsetY = { it },
-                        animationSpec = tween(500)
-                    ),
-                    modifier = Modifier.align(Alignment.BottomCenter)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
-                            .background(Color(0xFFFFFFFF))
-                            .clickable(
-                                indication = null,
-                                interactionSource = remember { MutableInteractionSource() }
-                            ) {}
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(shape = RoundedCornerShape(8.dp))
-                                    .clickable {}
-                                    .padding(8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(16.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.BookmarkBorder,
-                                    contentDescription = null,
-                                    tint = Color(0xFF4E4B66),
-                                    modifier = Modifier.size(25.dp)
-
-                                )
-
-                                Text(
-                                    text = "Save for later",
-                                    fontSize = 20.sp,
-                                    fontFamily = InterDisplay,
-                                    color = Color(0xFF02040D),
-                                    fontWeight = FontWeight.Normal
-                                )
-                            }
-
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(shape = RoundedCornerShape(8.dp))
-                                    .clickable {}
-                                    .padding(8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(16.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Share,
-                                    contentDescription = null,
-                                    tint = Color(0xFF4E4B66),
-                                    modifier = Modifier.size(25.dp)
-
-                                )
-
-                                Text(
-                                    text = "Share",
-                                    fontSize = 20.sp,
-                                    fontFamily = InterDisplay,
-                                    color = Color(0xFF02040D),
-                                    fontWeight = FontWeight.Normal
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(16.dp))
-
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(shape = RoundedCornerShape(8.dp))
-                                    .clickable {}
-                                    .padding(8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(16.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.OpenInNew,
-                                    contentDescription = null,
-                                    tint = Color(0xFF4E4B66),
-                                    modifier = Modifier.size(25.dp)
-
-                                )
-
-                                Text(
-                                    text = "Redirect to website",
-                                    fontSize = 20.sp,
-                                    fontFamily = InterDisplay,
-                                    color = Color(0xFF02040D),
-                                    fontWeight = FontWeight.Normal
-                                )
-                            }
-
-                            Spacer(modifier = Modifier.height(16.dp))
-
-                        }
-                    }
+            MenuItems(
+                article = selectedArticle!!,
+                onDismiss = {
+                    isMenuVisible = false
+                },
+                onSaveClick = {},
+                onShareClick = { article ->
+                    shareUrl(context, article.url)
+                },
+                onRedirectClick = {article ->
+                    openWebsite(context, article.url)
                 }
-            }
+            )
         }
 
 
