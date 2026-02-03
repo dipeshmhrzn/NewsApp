@@ -18,6 +18,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -44,6 +45,8 @@ fun SignUpScreen(
     navHostController: NavHostController,
     authViewModel: AuthViewModel = hiltViewModel()
 ) {
+
+    val focusManager = LocalFocusManager.current
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -159,6 +162,7 @@ fun SignUpScreen(
 
             CustomButton(
                 onButtonClick = {
+                    focusManager.clearFocus()
                     authViewModel.signUp(email, password)
                 },
                 buttonText = "Sign Up",

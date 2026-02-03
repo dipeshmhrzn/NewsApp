@@ -97,7 +97,9 @@ fun ProfileScreen(
                             .align(Alignment.CenterEnd)
                             .size(32.dp)
                             .clip(CircleShape)
-                            .clickable { },
+                            .clickable {
+                                navHostController.popBackStack()
+                            },
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -123,7 +125,7 @@ fun ProfileScreen(
                     Box(
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
-                            .offset(x = (-2).dp, y = (-2).dp) // optional fine-tuning
+                            .offset(x = (-2).dp, y = (-2).dp)
                             .size(26.dp)
                             .clip(CircleShape)
                             .background(Color(0xFFE5E5E5))

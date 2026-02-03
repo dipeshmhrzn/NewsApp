@@ -19,6 +19,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -44,6 +45,8 @@ fun LoginScreen(
     authViewModel: AuthViewModel = hiltViewModel(),
     authDataStoreViewModel: AuthDataStoreViewModel
 ) {
+
+    val focusManager = LocalFocusManager.current
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -177,6 +180,7 @@ fun LoginScreen(
 
             CustomButton(
                 onButtonClick = {
+                    focusManager.clearFocus()
                     authViewModel.login(email, password)
                 },
                 buttonText = "Login",
