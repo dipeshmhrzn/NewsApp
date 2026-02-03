@@ -1,5 +1,8 @@
 package com.example.newsapp.presentation.mainscreen.homescreen
 
+import android.content.Intent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -21,6 +24,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -45,13 +49,10 @@ import com.example.newsapp.presentation.mainscreen.homescreen.components.Shimmer
 import com.example.newsapp.presentation.mainscreen.homescreen.components.TopHeadLinesCard
 import com.example.newsapp.presentation.utils.getRelativeTime
 import com.example.newsapp.presentation.utils.openWebsite
-import com.example.newsapp.presentation.utils.shareUrl
+import com.example.newsapp.presentation.utils.shareUrlIntent
 import com.example.newsapp.presentation.viewmodels.NewsViewModel
 import com.example.newsapp.ui.theme.InterDisplay
 import com.example.newsapp.ui.theme.PlayFairDisplay
-import com.google.accompanist.placeholder.PlaceholderHighlight
-import com.google.accompanist.placeholder.material.placeholder
-import com.google.accompanist.placeholder.shimmer
 
 @Composable
 fun HomeScreen(
@@ -61,6 +62,10 @@ fun HomeScreen(
 ) {
 
     val context = LocalContext.current
+
+    val shareLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { }
 
     val newsState by viewModel.newsState.collectAsState()
     val categoryNewsState by viewModel.categoryNewsState.collectAsState()
@@ -82,6 +87,7 @@ fun HomeScreen(
 
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val cardWidth = screenWidth * 0.9f
+
 
     LazyColumn(
         state = listState,
@@ -139,7 +145,7 @@ fun HomeScreen(
                     }
 
                     Result.Idle, Result.Loading -> {
-                        items(8){
+                        items(8) {
                             ShimmeredTopHeadlineCard(true)
                         }
                     }
@@ -154,7 +160,7 @@ fun HomeScreen(
                                     .clip(RoundedCornerShape(8.dp))
                                     .background(Color(0xFF737373).copy(alpha = .1f)),
                                 contentAlignment = Alignment.Center
-                            ){
+                            ) {
                                 Text(
                                     text = state.message.toString(),
                                     fontSize = 18.sp,
@@ -228,10 +234,10 @@ fun HomeScreen(
                             title = item.title,
                             sourceName = item.source.name,
                             onCardClick = {
-                                openWebsite(context,item.url)
+                                openWebsite(context, item.url)
                             },
                             onShareClick = {
-                                shareUrl(context,item.url)
+                                shareLauncher.launch(shareUrlIntent(item.url))
                             },
                             onBookmarkClick = {},
                             publishedAt = getRelativeTime(item.publishedAt)
@@ -241,7 +247,7 @@ fun HomeScreen(
             }
 
             Result.Idle, Result.Loading -> {
-                items(8){
+                items(8) {
                     ShimmeredNewsCard(true)
                 }
             }
@@ -256,7 +262,7 @@ fun HomeScreen(
                             .clip(RoundedCornerShape(8.dp))
                             .background(Color(0xFF737373).copy(alpha = .1f)),
                         contentAlignment = Alignment.Center
-                    ){
+                    ) {
                         Text(
                             text = state.message.toString(),
                             fontSize = 18.sp,

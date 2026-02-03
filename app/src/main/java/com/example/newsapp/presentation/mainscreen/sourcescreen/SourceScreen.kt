@@ -45,7 +45,7 @@ import com.google.accompanist.placeholder.shimmer
 
 @Composable
 fun SourceScreen(
-    navHostController: NavHostController,
+    onSourceClick: (String) -> Unit = {},
     viewModel: NewsViewModel,
     followViewModel: FollowViewModel = hiltViewModel()
 ) {
@@ -110,11 +110,7 @@ fun SourceScreen(
                                         source = source.name,
                                         isFollowed = isFollowed,
                                         onSourceClick = {
-                                            navHostController.navigate(
-                                                Routes.SourcesDetailScreen(
-                                                    sourceId = source.id
-                                                )
-                                            )
+                                            onSourceClick(source.id)
                                         },
                                         onFollowClick = {
                                             if (isFollowed) {

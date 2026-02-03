@@ -1,5 +1,8 @@
 package com.example.newsapp.presentation.mainscreen.sourcescreen
 
+import android.content.Intent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -9,13 +12,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -40,18 +43,19 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.newsapp.data.dto.topheadlines.Article
 import com.example.newsapp.domain.util.Result
 import com.example.newsapp.presentation.mainscreen.components.MenuItems
-import com.example.newsapp.presentation.mainscreen.homescreen.components.ShimmeredNewsCard
-import com.example.newsapp.presentation.mainscreen.homescreen.components.ShimmeredTopHeadlineCard
 import com.example.newsapp.presentation.mainscreen.sourcescreen.components.ShimmeredSourceNewsCard
-import com.example.newsapp.presentation.viewmodels.NewsViewModel
 import com.example.newsapp.presentation.mainscreen.sourcescreen.components.SourceNewsCard
+import com.example.newsapp.presentation.utils.findActivity
 import com.example.newsapp.presentation.utils.getRelativeTime
 import com.example.newsapp.presentation.utils.openWebsite
-import com.example.newsapp.presentation.utils.shareUrl
+import com.example.newsapp.presentation.utils.shareUrlIntent
+import com.example.newsapp.presentation.viewmodels.FollowViewModel
+import com.example.newsapp.presentation.viewmodels.NewsViewModel
 import com.example.newsapp.ui.theme.InterDisplay
 import com.example.newsapp.ui.theme.PlayFairDisplay
 
@@ -60,10 +64,19 @@ import com.example.newsapp.ui.theme.PlayFairDisplay
 fun SourcesDetailScreen(
     sourceId: String,
     navHostController: NavHostController,
-    viewModel: NewsViewModel
+    viewModel: NewsViewModel,
+    followViewModel: FollowViewModel = hiltViewModel()
 ) {
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val context = LocalContext.current
+
+    val shareLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { }
+
+    val followedSourceIds by followViewModel
+        .followedSourceIds
+        .collectAsState()
 
     LaunchedEffect(sourceId) {
         viewModel.getNewsBySources(sourceId)
@@ -79,128 +92,139 @@ fun SourcesDetailScreen(
     var selectedArticle by remember { mutableStateOf<Article?>(null) }
 
     Box(modifier = Modifier.fillMaxSize()) {
-    Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        text = sourceTitle,
-                        fontFamily = PlayFairDisplay,
-                        fontSize = 26.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = {
-                        navHostController.popBackStack()
-                    }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = null
+        Scaffold(
+            topBar = {
+                val isFollowed = followedSourceIds.contains(sourceId)
+                CenterAlignedTopAppBar(
+                    title = {
+                        Text(
+                            text = sourceTitle,
+                            fontFamily = PlayFairDisplay,
+                            fontSize = 26.sp,
+                            fontWeight = FontWeight.SemiBold
                         )
-                    }
-                }, actions = {
-                    Box(
-                        modifier = Modifier
-                            .padding(end = 12.dp)
-                            .size(32.dp)
-                            .clip(shape = CircleShape)
-                            .border(
-                                width = 1.dp,
-                                color = Color(0xFF737373),
-                                shape = CircleShape
-                            )
-                            .clickable {}
-                            .padding(3.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.StarBorder,
-                            contentDescription = "Following",
-                            tint = Color(0xFF737373)
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color(0xFFFFFFFF)
-                )
-            )
-        },
-        containerColor = Color(0xFFFFFFFF)
-    ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier.padding(paddingValues)
-        ) {
-
-            when (val state = newsBySources) {
-                is Result.Success -> {
-                    val articles = state.data
-                    items(articles) { article ->
-                        Box(
-                            modifier = Modifier.padding(8.dp)
-                        ) {
-                            SourceNewsCard(
-                                onCardClick = {
-                                    openWebsite(context, article.url)
-                                },
-                                onMenuClick = {
-                                    selectedArticle = article
-                                    isMenuVisible = !isMenuVisible
-                                },
-                                urlToImage = article.urlToImage,
-                                author = article.author ?: "",
-                                title = article.title,
-                                publishedAt = getRelativeTime(article.publishedAt)
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = {
+                            navHostController.popBackStack()
+                        }) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = null
                             )
                         }
-                    }
-
-                }
-
-                Result.Idle, Result.Loading -> {
-                    items(8) {
-                        ShimmeredSourceNewsCard(true)
-                    }
-                }
-
-                is Result.Error -> {
-                    items(5) {
+                    }, actions = {
                         Box(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp)
-                                .height(150.dp)
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(Color(0xFF737373).copy(alpha = .1f)),
+                                .padding(end = 12.dp)
+                                .size(32.dp)
+                                .clip(shape = CircleShape)
+                                .border(
+                                    width = 1.dp,
+                                    color = if (isFollowed) Color.Black else Color(0xFF737373),
+                                    shape = CircleShape
+                                )
+                                .clickable {
+                                    if (isFollowed) {
+                                        followViewModel.unfollowSource(sourceId)
+                                    } else {
+                                        followViewModel.followSource(sourceId)
+                                    }
+                                }
+                                .padding(3.dp),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(
-                                text = state.message.toString(),
-                                fontSize = 18.sp,
-                                fontFamily = InterDisplay,
-                                fontWeight = FontWeight.Normal,
+                            Icon(
+                                imageVector = if (isFollowed)
+                                    Icons.Filled.Star
+                                else
+                                    Icons.Outlined.StarBorder,
+                                contentDescription = "Following",
+                                tint = if (isFollowed) Color.Black else Color(0xFF737373)
                             )
+                        }
+                    },
+                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                        containerColor = Color(0xFFFFFFFF)
+                    )
+                )
+            },
+            containerColor = Color(0xFFFFFFFF)
+        ) { paddingValues ->
+            LazyColumn(
+                modifier = Modifier.padding(paddingValues)
+            ) {
+
+                when (val state = newsBySources) {
+                    is Result.Success -> {
+                        val articles = state.data
+                        items(articles) { article ->
+                            Box(
+                                modifier = Modifier.padding(8.dp)
+                            ) {
+                                SourceNewsCard(
+                                    onCardClick = {
+                                        openWebsite(context, article.url)
+                                    },
+                                    onMenuClick = {
+                                        selectedArticle = article
+                                        isMenuVisible = !isMenuVisible
+                                    },
+                                    urlToImage = article.urlToImage,
+                                    author = article.author ?: "",
+                                    title = article.title,
+                                    publishedAt = getRelativeTime(article.publishedAt)
+                                )
+                            }
+                        }
+
+                    }
+
+                    Result.Idle, Result.Loading -> {
+                        items(8) {
+                            ShimmeredSourceNewsCard(true)
+                        }
+                    }
+
+                    is Result.Error -> {
+                        items(5) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp)
+                                    .height(150.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(Color(0xFF737373).copy(alpha = .1f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = state.message.toString(),
+                                    fontSize = 18.sp,
+                                    fontFamily = InterDisplay,
+                                    fontWeight = FontWeight.Normal,
+                                )
+                            }
                         }
                     }
                 }
-            }
 
+            }
+        }
+        if (isMenuVisible) {
+            MenuItems(
+                article = selectedArticle!!,
+                onDismiss = {
+                    isMenuVisible = false
+                },
+                onSaveClick = {},
+                onShareClick = { article ->
+                    shareLauncher.launch(shareUrlIntent(article.url))
+                },
+                onRedirectClick = { article ->
+                    openWebsite(context, article.url)
+                }
+            )
         }
     }
-    if (isMenuVisible) {
-        MenuItems(
-            article = selectedArticle!!,
-            onDismiss = {
-                isMenuVisible = false
-            },
-            onSaveClick = {},
-            onShareClick = { article ->
-                shareUrl(context, article.url)
-            },
-            onRedirectClick = {article ->
-                openWebsite(context, article.url)
-            }
-        )
-    }}
 }
 

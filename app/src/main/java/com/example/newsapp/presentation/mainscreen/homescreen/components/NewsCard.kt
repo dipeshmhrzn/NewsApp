@@ -76,6 +76,8 @@ fun NewsCard(
                     Text(
                         text = sourceName,
                         fontSize = 16.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                         fontFamily = InterDisplay,
                         fontWeight = FontWeight.Medium,
                         color = Color(0xFF4E4B66)

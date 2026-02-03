@@ -1,5 +1,8 @@
 package com.example.newsapp.presentation.mainscreen.homescreen
 
+import android.content.Intent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -31,9 +34,10 @@ import androidx.navigation.NavHostController
 import com.example.newsapp.data.dto.topheadlines.Article
 import com.example.newsapp.presentation.mainscreen.components.MenuItems
 import com.example.newsapp.presentation.mainscreen.homescreen.components.TopHeadLinesCard
+import com.example.newsapp.presentation.utils.findActivity
 import com.example.newsapp.presentation.utils.getRelativeTime
 import com.example.newsapp.presentation.utils.openWebsite
-import com.example.newsapp.presentation.utils.shareUrl
+import com.example.newsapp.presentation.utils.shareUrlIntent
 import com.example.newsapp.ui.theme.PlayFairDisplay
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -45,6 +49,9 @@ fun AllTopHeadlineScreen(
 
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val context = LocalContext.current
+    val shareLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { }
 
     var isMenuVisible by remember { mutableStateOf(false) }
     var selectedArticle by remember { mutableStateOf<Article?>(null) }
@@ -128,9 +135,9 @@ fun AllTopHeadlineScreen(
                 },
                 onSaveClick = {},
                 onShareClick = { article ->
-                    shareUrl(context, article.url)
+                    shareLauncher.launch(shareUrlIntent(article.url))
                 },
-                onRedirectClick = {article ->
+                onRedirectClick = { article ->
                     openWebsite(context, article.url)
                 }
             )

@@ -45,6 +45,9 @@ class NewsViewModel @Inject constructor(
     private val _newsBySources = MutableStateFlow<Result<List<Article>>>(Result.Idle)
     val newsBySources = _newsBySources.asStateFlow()
 
+    private val _newsBySourcesMap = MutableStateFlow<Map<String, Result<List<Article>>>>(emptyMap())
+    val newsBySourcesMap = _newsBySourcesMap.asStateFlow()
+
     private var cachedTopHeadlines: List<Article>? = null
     private val cachedCategoryNews = mutableMapOf<String, List<Article>>()
     private val cachedSourcesByCategory = mutableMapOf<String, List<Source>>()
@@ -94,6 +97,26 @@ class NewsViewModel @Inject constructor(
                 }
                 is Result.Error -> Result.Error("Error fetching news")
                 else -> Result.Idle
+            }
+        }
+    }
+
+    fun getNewsBySourcesForFollowing(sourceId: String) {
+        cachedNewsBySources[sourceId]?.let {
+            _newsBySourcesMap.value = _newsBySourcesMap.value + (sourceId to Result.Success(it))
+            return
+        }
+
+        viewModelScope.launch {
+            _newsBySourcesMap.value = _newsBySourcesMap.value + (sourceId to Result.Loading)
+            val result = getNewsBySourcesUseCase(sourceId)
+            _newsBySourcesMap.value = when (result) {
+                is Result.Success -> {
+                    cachedNewsBySources[sourceId] = result.data
+                    _newsBySourcesMap.value + (sourceId to result)
+                }
+                is Result.Error -> _newsBySourcesMap.value + (sourceId to result)
+                else -> _newsBySourcesMap.value + (sourceId to Result.Idle)
             }
         }
     }

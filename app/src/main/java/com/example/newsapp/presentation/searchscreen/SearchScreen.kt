@@ -1,5 +1,8 @@
 package com.example.newsapp.presentation.searchscreen
 
+import android.content.Intent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
@@ -45,9 +48,10 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.newsapp.domain.util.Result
 import com.example.newsapp.presentation.mainscreen.homescreen.components.NewsCard
 import com.example.newsapp.presentation.mainscreen.homescreen.components.ShimmeredNewsCard
+import com.example.newsapp.presentation.utils.findActivity
 import com.example.newsapp.presentation.utils.getRelativeTime
 import com.example.newsapp.presentation.utils.openWebsite
-import com.example.newsapp.presentation.utils.shareUrl
+import com.example.newsapp.presentation.utils.shareUrlIntent
 import com.example.newsapp.presentation.viewmodels.NewsViewModel
 import com.example.newsapp.ui.theme.InterDisplay
 
@@ -65,6 +69,9 @@ fun SearchScreen(
 
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val context = LocalContext.current
+    val shareLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { }
 
 
     LaunchedEffect(Unit) {
@@ -113,8 +120,7 @@ fun SearchScreen(
                                     .clickable {
                                         query = ""
                                         newsViewModel.clearSearch()
-                                    }
-                            )
+                                    })
                         }
                     },
                     modifier = Modifier
@@ -175,7 +181,7 @@ fun SearchScreen(
                                         openWebsite(context, article.url)
                                     },
                                     onShareClick = {
-                                        shareUrl(context, article.url)
+                                        shareLauncher.launch(shareUrlIntent(article.url))
                                     },
                                     onBookmarkClick = {},
                                     publishedAt = getRelativeTime(article.publishedAt)
@@ -189,7 +195,9 @@ fun SearchScreen(
                     if (query.isBlank()) {
                         item {
                             Box(
-                                modifier = Modifier.fillMaxSize().padding(16.dp),
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(16.dp),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Spacer(modifier = Modifier.height(150.dp))
@@ -213,7 +221,9 @@ fun SearchScreen(
                 is Result.Error -> {
                     item {
                         Box(
-                            modifier = Modifier.fillMaxSize().padding(16.dp),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(16.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             Spacer(modifier = Modifier.height(150.dp))
