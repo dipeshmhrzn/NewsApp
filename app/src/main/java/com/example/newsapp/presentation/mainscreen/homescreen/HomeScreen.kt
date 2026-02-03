@@ -41,6 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.newsapp.data.dto.topheadlines.Article
 import com.example.newsapp.domain.util.Result
 import com.example.newsapp.presentation.mainscreen.homescreen.components.NewsCard
@@ -50,6 +51,7 @@ import com.example.newsapp.presentation.mainscreen.homescreen.components.TopHead
 import com.example.newsapp.presentation.utils.getRelativeTime
 import com.example.newsapp.presentation.utils.openWebsite
 import com.example.newsapp.presentation.utils.shareUrlIntent
+import com.example.newsapp.presentation.viewmodels.BookmarkViewModel
 import com.example.newsapp.presentation.viewmodels.NewsViewModel
 import com.example.newsapp.ui.theme.InterDisplay
 import com.example.newsapp.ui.theme.PlayFairDisplay
@@ -58,7 +60,8 @@ import com.example.newsapp.ui.theme.PlayFairDisplay
 fun HomeScreen(
     onSeeAll: () -> Unit,
     onMenuClick: (item: Article) -> Unit,
-    viewModel: NewsViewModel
+    viewModel: NewsViewModel,
+    bookmarkViewModel: BookmarkViewModel= hiltViewModel()
 ) {
 
     val context = LocalContext.current
@@ -88,6 +91,7 @@ fun HomeScreen(
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val cardWidth = screenWidth * 0.9f
 
+    val bookmarks by bookmarkViewModel.bookmarks.collectAsState()
 
     LazyColumn(
         state = listState,
@@ -228,8 +232,10 @@ fun HomeScreen(
                     Box(
                         modifier = Modifier.padding(start = 8.dp, top = 8.dp, bottom = 8.dp)
                     ) {
+                        val isBookmarked = bookmarks.any { it.url == item.url }
 
                         NewsCard(
+                            isBookmarked=isBookmarked,
                             urlToImage = item.urlToImage,
                             title = item.title,
                             sourceName = item.source.name,
@@ -239,7 +245,9 @@ fun HomeScreen(
                             onShareClick = {
                                 shareLauncher.launch(shareUrlIntent(item.url))
                             },
-                            onBookmarkClick = {},
+                            onBookmarkClick = {
+                                bookmarkViewModel.toggleBookmark(item)
+                            },
                             publishedAt = getRelativeTime(item.publishedAt)
                         )
                     }

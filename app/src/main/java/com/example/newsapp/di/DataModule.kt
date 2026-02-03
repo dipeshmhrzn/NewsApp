@@ -1,15 +1,20 @@
 package com.example.newsapp.di
 
 import android.content.Context
-import com.example.newsapp.data.local.AuthDataStore
-import com.example.newsapp.data.local.FollowDataStore
+import androidx.room.Room
+import com.example.newsapp.data.local.dao.BookmarkDao
+import com.example.newsapp.data.local.database.NewsDatabase
+import com.example.newsapp.data.local.datastore.AuthDataStore
+import com.example.newsapp.data.local.datastore.FollowDataStore
 import com.example.newsapp.data.remote.NewsApiServices
 import com.example.newsapp.data.repositoryimpl.AuthDataStoreRepositoryImpl
 import com.example.newsapp.data.repositoryimpl.AuthRepositoryImpl
+import com.example.newsapp.data.repositoryimpl.BookmarkRepositoryImpl
 import com.example.newsapp.data.repositoryimpl.FollowRepositoryImpl
 import com.example.newsapp.data.repositoryimpl.NewsRepositoryImpl
 import com.example.newsapp.domain.repository.AuthDataStoreRepository
 import com.example.newsapp.domain.repository.AuthRepository
+import com.example.newsapp.domain.repository.BookmarkRepository
 import com.example.newsapp.domain.repository.FollowRepository
 import com.example.newsapp.domain.repository.NewsRepository
 import com.google.firebase.auth.FirebaseAuth
@@ -23,7 +28,6 @@ import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
-import io.ktor.http.ContentType.Application.Json
 import io.ktor.http.URLProtocol
 import io.ktor.http.encodedPath
 import io.ktor.serialization.kotlinx.json.json
@@ -107,7 +111,26 @@ object DataModule {
         return FollowRepositoryImpl(dataStore)
     }
 
+    @Provides
+    @Singleton
+    fun provideNewsDatabase(@ApplicationContext context: Context): NewsDatabase{
+        return Room.databaseBuilder(
+            context = context,
+           klass =  NewsDatabase::class.java,
+            name = "news_db"
+        ).build()
+    }
 
+    @Provides
+    @Singleton
+    fun provideBookmarkDao(database: NewsDatabase): BookmarkDao{
+        return database.BookmarkDao()
+    }
 
+    @Provides
+    @Singleton
+    fun provideBookmarkRepository(bookmarkDao: BookmarkDao): BookmarkRepository{
+        return BookmarkRepositoryImpl(bookmarkDao)
+    }
 
 }

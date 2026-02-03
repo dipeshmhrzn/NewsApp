@@ -16,8 +16,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.outlined.Bookmark
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -36,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.SubcomposeAsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
+import com.example.newsapp.domain.usecase.bookmarkusecase.IsBookmarked
 import com.example.newsapp.ui.theme.InterDisplay
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.material.placeholder
@@ -44,12 +48,13 @@ import com.google.accompanist.placeholder.shimmer
 @Composable
 fun NewsCard(
     onCardClick: () -> Unit,
-    onShareClick:()->Unit,
-    onBookmarkClick:()->Unit,
+    onShareClick: () -> Unit,
+    onBookmarkClick: () -> Unit,
     urlToImage: String?,
     title: String,
     sourceName: String,
-    publishedAt: String
+    publishedAt: String,
+    isBookmarked: Boolean = false
 ) {
 
     val context = LocalContext.current
@@ -181,7 +186,7 @@ fun NewsCard(
                         .padding(4.dp),
                 ) {
                     Icon(
-                        imageVector = Icons.Default.BookmarkBorder,
+                        imageVector = if (isBookmarked) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
                         contentDescription = null,
                         tint = Color(0xFF4E4B66),
                         modifier = Modifier.size(20.dp)

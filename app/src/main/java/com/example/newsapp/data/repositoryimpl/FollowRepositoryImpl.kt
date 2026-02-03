@@ -1,6 +1,6 @@
 package com.example.newsapp.data.repositoryimpl
 
-import com.example.newsapp.data.local.FollowDataStore
+import com.example.newsapp.data.local.datastore.FollowDataStore
 import com.example.newsapp.domain.repository.FollowRepository
 import kotlinx.coroutines.flow.Flow
 

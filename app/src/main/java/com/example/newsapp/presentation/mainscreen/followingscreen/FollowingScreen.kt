@@ -43,6 +43,7 @@ import com.example.newsapp.ui.theme.InterDisplay
 @Composable
 fun FollowingScreen(
     onNavigateToSource: () -> Unit = {},
+    onNavigateToBookmark: () -> Unit = {},
     onReadMoreClick: (String) -> Unit = {},
     followViewModel: FollowViewModel = hiltViewModel(),
     newsViewModel: NewsViewModel = hiltViewModel()
@@ -75,7 +76,9 @@ fun FollowingScreen(
                     .background(Color.White)
                     .padding(16.dp)
                     .clip(RoundedCornerShape(20.dp))
-                    .clickable {}
+                    .clickable {
+                        onNavigateToBookmark()
+                    }
 
             ) {
                 Row(

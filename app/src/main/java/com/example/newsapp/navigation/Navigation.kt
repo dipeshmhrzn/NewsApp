@@ -18,6 +18,7 @@ import com.example.newsapp.presentation.searchscreen.SearchScreen
 import com.example.newsapp.presentation.mainscreen.sourcescreen.SourcesDetailScreen
 import com.example.newsapp.presentation.authscreen.LoginScreen
 import com.example.newsapp.presentation.authscreen.SignUpScreen
+import com.example.newsapp.presentation.bookmarkscreen.BookmarkScreen
 import com.example.newsapp.presentation.mainscreen.homescreen.AllTopHeadlineScreen
 import com.example.newsapp.presentation.mainscreen.MainScreen
 import com.example.newsapp.presentation.viewmodels.NewsViewModel
@@ -266,6 +267,27 @@ fun Navigation() {
             )
         }
 
+        composable<Routes.BookmarkScreen>(
+            enterTransition = {
+                fadeIn(
+                    animationSpec = tween(
+                        durationMillis = 500,
+                        easing = LinearEasing
+                    )
+                )
+            },
+            popExitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { it },
+                    animationSpec = tween(
+                        durationMillis = 500,
+                        easing = FastOutSlowInEasing
+                    )
+                )
+            }
+        ) {
+            BookmarkScreen()
+        }
 
     }
 

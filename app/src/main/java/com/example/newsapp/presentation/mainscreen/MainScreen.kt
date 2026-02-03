@@ -159,6 +159,9 @@ fun MainScreen(
                                     sourceId = id
                                 )
                             )
+                        },
+                        onNavigateToBookmark = {
+                            navHostController.navigate(Routes.BookmarkScreen)
                         }
                     )
                 }
