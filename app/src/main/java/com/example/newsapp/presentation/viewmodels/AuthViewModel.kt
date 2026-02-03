@@ -56,6 +56,10 @@ class AuthViewModel @Inject constructor(
             delay(300)
             val result = signOutUseCase()
             Log.d("AuthViewModel", "signOut: $result")
+
+            if (result is Result.Success){
+                setAuthDatastoreUseCase.setLoggedIn(false)
+            }
             _authState.value = result
         }
     }

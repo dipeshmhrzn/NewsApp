@@ -186,7 +186,8 @@ fun OnboardingPager(
                     border = BorderStroke(1.dp, Color.Black)
                 ) {
                     Text(
-                        text = "Skip For Now", fontFamily = InterDisplay,
+                        text = "Skip For Now",
+                        fontFamily = InterDisplay,
                         fontWeight = FontWeight.Normal,
                         fontSize = 16.sp
                     )

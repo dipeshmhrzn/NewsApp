@@ -214,7 +214,7 @@ fun Navigation() {
                 )
             }
         ) {
-            ProfileScreen()
+            ProfileScreen(navHostController = navController)
         }
 
         composable<Routes.SearchScreen>(
