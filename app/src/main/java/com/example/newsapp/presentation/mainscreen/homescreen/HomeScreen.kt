@@ -1,6 +1,7 @@
 package com.example.newsapp.presentation.mainscreen.homescreen
 
 import android.content.Intent
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
@@ -91,7 +92,14 @@ fun HomeScreen(
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val cardWidth = screenWidth * 0.9f
 
-    val bookmarks by bookmarkViewModel.bookmarks.collectAsState()
+    val bookmarkState by bookmarkViewModel.uiState.collectAsState()
+
+    LaunchedEffect(bookmarkState.message) {
+        bookmarkState.message?.let { msg ->
+            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+            bookmarkViewModel.clearMessage()
+        }
+    }
 
     LazyColumn(
         state = listState,
@@ -232,7 +240,7 @@ fun HomeScreen(
                     Box(
                         modifier = Modifier.padding(start = 8.dp, top = 8.dp, bottom = 8.dp)
                     ) {
-                        val isBookmarked = bookmarks.any { it.url == item.url }
+                        val isBookmarked = bookmarkState.bookmarks.any { it.url == item.url }
 
                         NewsCard(
                             isBookmarked=isBookmarked,

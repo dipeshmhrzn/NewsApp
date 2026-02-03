@@ -1,5 +1,6 @@
 package com.example.newsapp.presentation.mainscreen.followingscreen
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -36,6 +37,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.newsapp.domain.util.Result
 import com.example.newsapp.presentation.mainscreen.followingscreen.components.FollowingCard
 import com.example.newsapp.presentation.mainscreen.sourcescreen.components.ShimmeredSourceNewsCard
+import com.example.newsapp.presentation.viewmodels.BookmarkViewModel
 import com.example.newsapp.presentation.viewmodels.FollowViewModel
 import com.example.newsapp.presentation.viewmodels.NewsViewModel
 import com.example.newsapp.ui.theme.InterDisplay
@@ -46,7 +48,8 @@ fun FollowingScreen(
     onNavigateToBookmark: () -> Unit = {},
     onReadMoreClick: (String) -> Unit = {},
     followViewModel: FollowViewModel = hiltViewModel(),
-    newsViewModel: NewsViewModel = hiltViewModel()
+    newsViewModel: NewsViewModel = hiltViewModel(),
+    bookmarkViewModel: BookmarkViewModel = hiltViewModel()
 ) {
 
     val context = LocalContext.current
@@ -56,6 +59,16 @@ fun FollowingScreen(
         .collectAsState()
 
     val newsBySourcesMap by newsViewModel.newsBySourcesMap.collectAsState()
+
+
+    val bookmarkState by bookmarkViewModel.uiState.collectAsState()
+
+    LaunchedEffect(bookmarkState.message) {
+        bookmarkState.message?.let { msg ->
+            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+            bookmarkViewModel.clearMessage()
+        }
+    }
 
     LaunchedEffect(followedSourceIds) {
         followedSourceIds.forEach { sourceId ->
@@ -163,10 +176,12 @@ fun FollowingScreen(
                 }
 
                 is Result.Success -> {
+
                     item {
                         FollowingCard(
                             isFollowed = isFollowed,
                             articles = result.data,
+                            bookmarkState = bookmarkState,
                             onFollowClick = {
                                 if (isFollowed) {
                                     followViewModel.unfollowSource(sourceId)
@@ -175,6 +190,9 @@ fun FollowingScreen(
                                 }
                             }, onReadMoreClick = {
                                 onReadMoreClick(sourceId)
+                            },
+                            onBookmarkClick = {
+                                bookmarkViewModel.toggleBookmark(it)
                             }
                         )
                         Spacer(modifier = Modifier.height(10.dp))

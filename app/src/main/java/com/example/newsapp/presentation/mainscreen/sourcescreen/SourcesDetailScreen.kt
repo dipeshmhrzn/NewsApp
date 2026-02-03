@@ -1,6 +1,7 @@
 package com.example.newsapp.presentation.mainscreen.sourcescreen
 
 import android.content.Intent
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -54,6 +55,7 @@ import com.example.newsapp.presentation.utils.findActivity
 import com.example.newsapp.presentation.utils.getRelativeTime
 import com.example.newsapp.presentation.utils.openWebsite
 import com.example.newsapp.presentation.utils.shareUrlIntent
+import com.example.newsapp.presentation.viewmodels.BookmarkViewModel
 import com.example.newsapp.presentation.viewmodels.FollowViewModel
 import com.example.newsapp.presentation.viewmodels.NewsViewModel
 import com.example.newsapp.ui.theme.InterDisplay
@@ -65,7 +67,8 @@ fun SourcesDetailScreen(
     sourceId: String,
     navHostController: NavHostController,
     viewModel: NewsViewModel,
-    followViewModel: FollowViewModel = hiltViewModel()
+    followViewModel: FollowViewModel = hiltViewModel(),
+    bookmarkViewModel: BookmarkViewModel = hiltViewModel()
 ) {
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val context = LocalContext.current
@@ -90,6 +93,15 @@ fun SourcesDetailScreen(
     }
     var isMenuVisible by remember { mutableStateOf(false) }
     var selectedArticle by remember { mutableStateOf<Article?>(null) }
+
+    val bookmarkState by bookmarkViewModel.uiState.collectAsState()
+
+    LaunchedEffect(bookmarkState.message) {
+        bookmarkState.message?.let { msg ->
+            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+            bookmarkViewModel.clearMessage()
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
@@ -213,10 +225,13 @@ fun SourcesDetailScreen(
         if (isMenuVisible) {
             MenuItems(
                 article = selectedArticle!!,
+                isBookmarked = bookmarkState.bookmarks.any { it.url == selectedArticle!!.url },
                 onDismiss = {
                     isMenuVisible = false
                 },
-                onSaveClick = {},
+                onSaveClick = {article ->
+                    bookmarkViewModel.toggleBookmark(article)
+                },
                 onShareClick = { article ->
                     shareLauncher.launch(shareUrlIntent(article.url))
                 },

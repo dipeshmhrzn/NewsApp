@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.BookmarkRemove
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -39,6 +40,7 @@ import com.example.newsapp.ui.theme.InterDisplay
 @Composable
 fun MenuItems(
     article: Article,
+    isBookmarked: Boolean,
     onDismiss: () -> Unit,
     onSaveClick: (Article) -> Unit,
     onShareClick: (Article) -> Unit,
@@ -92,7 +94,7 @@ fun MenuItems(
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.Default.BookmarkBorder,
+                            imageVector = if (isBookmarked) Icons.Filled.BookmarkRemove else Icons.Default.BookmarkBorder,
                             contentDescription = null,
                             tint = Color(0xFF4E4B66),
                             modifier = Modifier.size(25.dp)
@@ -100,7 +102,7 @@ fun MenuItems(
                         )
 
                         Text(
-                            text = "Save for later",
+                            text = if (isBookmarked) "Remove from bookmark" else "Save for later",
                             fontSize = 20.sp,
                             fontFamily = InterDisplay,
                             color = Color(0xFF02040D),

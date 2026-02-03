@@ -1,6 +1,6 @@
 package com.example.newsapp.presentation.mainscreen.homescreen
 
-import android.content.Intent
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
@@ -18,6 +18,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,21 +32,23 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.newsapp.data.dto.topheadlines.Article
 import com.example.newsapp.presentation.mainscreen.components.MenuItems
 import com.example.newsapp.presentation.mainscreen.homescreen.components.TopHeadLinesCard
-import com.example.newsapp.presentation.utils.findActivity
 import com.example.newsapp.presentation.utils.getRelativeTime
 import com.example.newsapp.presentation.utils.openWebsite
 import com.example.newsapp.presentation.utils.shareUrlIntent
+import com.example.newsapp.presentation.viewmodels.BookmarkViewModel
 import com.example.newsapp.ui.theme.PlayFairDisplay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AllTopHeadlineScreen(
     navHostController: NavHostController,
-    articles: List<Article>
+    articles: List<Article>,
+    bookmarkViewModel: BookmarkViewModel = hiltViewModel()
 ) {
 
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
@@ -55,6 +59,15 @@ fun AllTopHeadlineScreen(
 
     var isMenuVisible by remember { mutableStateOf(false) }
     var selectedArticle by remember { mutableStateOf<Article?>(null) }
+
+    val bookmarkState by bookmarkViewModel.uiState.collectAsState()
+
+    LaunchedEffect(bookmarkState.message) {
+        bookmarkState.message?.let { msg ->
+            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+            bookmarkViewModel.clearMessage()
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
@@ -130,10 +143,13 @@ fun AllTopHeadlineScreen(
         if (isMenuVisible) {
             MenuItems(
                 article = selectedArticle!!,
+                isBookmarked = bookmarkState.bookmarks.any { it.url == selectedArticle!!.url },
                 onDismiss = {
                     isMenuVisible = false
                 },
-                onSaveClick = {},
+                onSaveClick = {article ->
+                    bookmarkViewModel.toggleBookmark(article)
+                },
                 onShareClick = { article ->
                     shareLauncher.launch(shareUrlIntent(article.url))
                 },

@@ -18,7 +18,8 @@ import kotlinx.coroutines.launch
 
 data class BookmarkUiState(
     val bookmarks: List<Article> = emptyList(),
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    val message: String? = null
 )
 
 
@@ -53,14 +54,19 @@ class BookmarkViewModel @Inject constructor(
         }
     }
 
-    // Toggle logic lives in ViewModel
     fun toggleBookmark(article: Article) {
         viewModelScope.launch {
-            val bookmarked = isBookmarked(article.url)
-            if (bookmarked) {
-                removeBookmark(article)
-            } else {
-                addBookmark(article)
+            try {
+                val bookmarked = isBookmarked(article.url)
+                if (bookmarked) {
+                    removeBookmark(article)
+                    _uiState.value = _uiState.value.copy(message = "Removed from bookmarks")
+                } else {
+                    addBookmark(article)
+                    _uiState.value = _uiState.value.copy(message = "Added to bookmarks")
+                }
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(message = "Failed to update bookmark")
             }
         }
     }
@@ -68,4 +74,9 @@ class BookmarkViewModel @Inject constructor(
     suspend fun isBookmarkedArticle(url: String): Boolean {
         return isBookmarked(url)
     }
+
+    fun clearMessage() {
+        _uiState.value = _uiState.value.copy(message = null)
+    }
+
 }

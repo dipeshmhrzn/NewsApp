@@ -1,6 +1,7 @@
 package com.example.newsapp.presentation.searchscreen
 
 import android.content.Intent
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -52,13 +53,15 @@ import com.example.newsapp.presentation.utils.findActivity
 import com.example.newsapp.presentation.utils.getRelativeTime
 import com.example.newsapp.presentation.utils.openWebsite
 import com.example.newsapp.presentation.utils.shareUrlIntent
+import com.example.newsapp.presentation.viewmodels.BookmarkViewModel
 import com.example.newsapp.presentation.viewmodels.NewsViewModel
 import com.example.newsapp.ui.theme.InterDisplay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
-    newsViewModel: NewsViewModel = hiltViewModel()
+    newsViewModel: NewsViewModel = hiltViewModel(),
+    bookmarkViewModel: BookmarkViewModel = hiltViewModel()
 ) {
 
     var query by remember { mutableStateOf("") }
@@ -69,9 +72,19 @@ fun SearchScreen(
 
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val context = LocalContext.current
+
     val shareLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { }
+
+    val bookmarkState by bookmarkViewModel.uiState.collectAsState()
+
+    LaunchedEffect(bookmarkState.message) {
+        bookmarkState.message?.let { msg ->
+            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+            bookmarkViewModel.clearMessage()
+        }
+    }
 
 
     LaunchedEffect(Unit) {
@@ -170,10 +183,13 @@ fun SearchScreen(
                         }
                     } else {
                         items(articles) { article ->
+                            val isBookmarked = bookmarkState.bookmarks.any { it.url == article.url }
+
                             Box(
                                 modifier = Modifier.padding(8.dp)
                             ) {
                                 NewsCard(
+                                    isBookmarked=isBookmarked,
                                     urlToImage = article.urlToImage,
                                     title = article.title,
                                     sourceName = article.source.name,
@@ -183,7 +199,9 @@ fun SearchScreen(
                                     onShareClick = {
                                         shareLauncher.launch(shareUrlIntent(article.url))
                                     },
-                                    onBookmarkClick = {},
+                                    onBookmarkClick = {
+                                        bookmarkViewModel.toggleBookmark(article)
+                                    },
                                     publishedAt = getRelativeTime(article.publishedAt)
                                 )
                             }

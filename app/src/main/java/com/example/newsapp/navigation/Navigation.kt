@@ -286,7 +286,7 @@ fun Navigation() {
                 )
             }
         ) {
-            BookmarkScreen()
+            BookmarkScreen(navHostController = navController)
         }
 
     }

@@ -1,6 +1,7 @@
 package com.example.newsapp.presentation.mainscreen
 
 import android.content.Intent
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -13,6 +14,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -20,6 +23,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -37,12 +41,14 @@ import com.example.newsapp.presentation.mainscreen.sourcescreen.SourceScreen
 import com.example.newsapp.presentation.utils.findActivity
 import com.example.newsapp.presentation.utils.openWebsite
 import com.example.newsapp.presentation.utils.shareUrlIntent
+import com.example.newsapp.presentation.viewmodels.BookmarkViewModel
 import com.example.newsapp.presentation.viewmodels.NewsViewModel
 
 @Composable
 fun MainScreen(
     navHostController: NavHostController,
-    newsViewModel: NewsViewModel
+    newsViewModel: NewsViewModel,
+    bookmarkViewModel: BookmarkViewModel = hiltViewModel()
 ) {
 
     val innerNavController = rememberNavController()
@@ -67,6 +73,16 @@ fun MainScreen(
         destination?.hasRoute<Routes.SourceScreen>() == true -> "Sources"
         else -> ""
     }
+
+    val bookmarkState by bookmarkViewModel.uiState.collectAsState()
+
+    LaunchedEffect(bookmarkState.message) {
+        bookmarkState.message?.let { msg ->
+            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+            bookmarkViewModel.clearMessage()
+        }
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
             topBar = {
@@ -202,10 +218,13 @@ fun MainScreen(
         if (isMenuVisible) {
             MenuItems(
                 article = selectedArticle!!,
+                isBookmarked= bookmarkState.bookmarks.any { it.url == selectedArticle!!.url },
                 onDismiss = {
                     isMenuVisible = false
                 },
-                onSaveClick = {},
+                onSaveClick = {article ->
+                    bookmarkViewModel.toggleBookmark(article)
+                },
                 onShareClick = { article ->
                     shareLauncher.launch(shareUrlIntent(article.url))
                 },

@@ -39,16 +39,18 @@ import com.example.newsapp.presentation.mainscreen.homescreen.components.NewsCar
 import com.example.newsapp.presentation.utils.findActivity
 import com.example.newsapp.presentation.utils.openWebsite
 import com.example.newsapp.presentation.utils.shareUrlIntent
+import com.example.newsapp.presentation.viewmodels.BookmarkUiState
 import com.example.newsapp.ui.theme.InterDisplay
 import kotlin.Unit
 
 @Composable
 fun FollowingCard(
     isFollowed: Boolean,
+    bookmarkState: BookmarkUiState,
     articles: List<Article>,
     onFollowClick: () -> Unit,
-    onReadMoreClick: () -> Unit
-
+    onReadMoreClick: () -> Unit,
+    onBookmarkClick: (article: Article) -> Unit,
 ) {
     if (articles.isEmpty()) return
 
@@ -111,7 +113,9 @@ fun FollowingCard(
             }
 
             articles.take(2).forEach { article ->
+                val isBookmarked = bookmarkState.bookmarks.any { it.url == article.url }
                 NewsCard(
+                    isBookmarked = isBookmarked,
                     onCardClick = {
                         openWebsite(context, article.url)
                     },
@@ -122,7 +126,9 @@ fun FollowingCard(
                     onShareClick = {
                         shareLauncher.launch(shareUrlIntent(article.url))
                     },
-                    onBookmarkClick = {}
+                    onBookmarkClick = {
+                        onBookmarkClick(article)
+                    }
                 )
             }
             Spacer(modifier = Modifier.height(10.dp))
