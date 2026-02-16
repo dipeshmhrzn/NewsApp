@@ -1,6 +1,5 @@
 package com.example.newsapp.presentation.mainscreen.sourcescreen
 
-import android.content.Intent
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -39,7 +38,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -51,7 +49,6 @@ import com.example.newsapp.domain.util.Result
 import com.example.newsapp.presentation.mainscreen.components.MenuItems
 import com.example.newsapp.presentation.mainscreen.sourcescreen.components.ShimmeredSourceNewsCard
 import com.example.newsapp.presentation.mainscreen.sourcescreen.components.SourceNewsCard
-import com.example.newsapp.presentation.utils.findActivity
 import com.example.newsapp.presentation.utils.getRelativeTime
 import com.example.newsapp.presentation.utils.openWebsite
 import com.example.newsapp.presentation.utils.shareUrlIntent
@@ -70,7 +67,6 @@ fun SourcesDetailScreen(
     followViewModel: FollowViewModel = hiltViewModel(),
     bookmarkViewModel: BookmarkViewModel = hiltViewModel()
 ) {
-    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val context = LocalContext.current
 
     val shareLauncher = rememberLauncherForActivityResult(

@@ -15,10 +15,10 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
-import kotlinx.coroutines.isActive
 
 
 @HiltViewModel
@@ -33,8 +33,10 @@ class NewsViewModel @Inject constructor(
     private val _newsState = MutableStateFlow<Result<List<Article>>>(Result.Idle)
     val newsState = _newsState.asStateFlow()
 
-    private val _categoryNewsState = MutableStateFlow<Result<List<Article>>>(Result.Idle)
+    private val _categoryNewsState = MutableStateFlow<Map<String, Result<List<Article>>>>(emptyMap())
+
     val categoryNewsState = _categoryNewsState.asStateFlow()
+
 
     private val _searchState = MutableStateFlow<Result<List<Article>>>(Result.Idle)
     val searchState = _searchState.asStateFlow()
@@ -48,10 +50,20 @@ class NewsViewModel @Inject constructor(
     private val _newsBySourcesMap = MutableStateFlow<Map<String, Result<List<Article>>>>(emptyMap())
     val newsBySourcesMap = _newsBySourcesMap.asStateFlow()
 
-    private var cachedTopHeadlines: List<Article>? = null
-    private val cachedCategoryNews = mutableMapOf<String, List<Article>>()
+    private var topHeadlinesPage =1
+    private val pageSize = 20
+    private var topHeadlinesEndReached=false
+    private var topHeadlinesLoading = false
+    private val cachedTopHeadlines = mutableListOf<Article>()
+
+    private val categoryNewsPages = mutableMapOf<String, Int>()
+    private val categoryNewsEndReached = mutableMapOf<String, Boolean>()
+    private val categoryNewsLoading = mutableMapOf<String, Boolean>()
+    private val cachedCategoryNews = mutableMapOf<String, MutableList<Article>>()
+
     private val cachedSourcesByCategory = mutableMapOf<String, List<Source>>()
     private val cachedNewsBySources = mutableMapOf<String, List<Article>>()
+
 
     private var searchJob: Job? = null
 
@@ -61,23 +73,35 @@ class NewsViewModel @Inject constructor(
         getCategoryNews("business")
     }
 
-    fun getTopHeadlines() {
-        cachedTopHeadlines?.let {
-            _newsState.value = Result.Success(it)
-            return
+    fun getTopHeadlines(reset: Boolean = false) {
+        if (topHeadlinesLoading || topHeadlinesEndReached) return
+
+        if (reset) {
+            topHeadlinesPage = 1
+            topHeadlinesEndReached = false
+            cachedTopHeadlines.clear()
         }
 
         viewModelScope.launch {
-            _newsState.value = Result.Loading
-            val result = getTopHeadlinesUseCase()
-            _newsState.value = when (result) {
+            topHeadlinesLoading = true
+            if (topHeadlinesPage == 1) _newsState.value = Result.Loading
+
+            val result = getTopHeadlinesUseCase(topHeadlinesPage, pageSize)
+            when (result) {
                 is Result.Success -> {
-                    cachedTopHeadlines = result.data
-                    Result.Success(result.data)
+                    if (result.data.isEmpty()) {
+                        topHeadlinesEndReached = true
+                    } else {
+                        cachedTopHeadlines.addAll(result.data)
+                        _newsState.value = Result.Success(cachedTopHeadlines.toList())
+                        topHeadlinesPage++
+                    }
                 }
-                is Result.Error -> Result.Error("Error fetching news")
-                else -> Result.Idle
+                is Result.Error -> _newsState.value = Result.Error(result.message)
+                else -> {}
             }
+
+            topHeadlinesLoading = false
         }
     }
 
@@ -121,25 +145,55 @@ class NewsViewModel @Inject constructor(
         }
     }
 
-    fun getCategoryNews(category: String) {
-        cachedCategoryNews[category]?.let {
-            _categoryNewsState.value = Result.Success(it)
+    fun getCategoryNews(category: String, reset: Boolean = false) {
+        val page = categoryNewsPages.getOrDefault(category, 1)
+        val endReached = categoryNewsEndReached.getOrDefault(category, false)
+        val loading = categoryNewsLoading.getOrDefault(category, false)
+        val cached = cachedCategoryNews.getOrPut(category) { mutableListOf() }
+
+        if (loading || endReached) return
+
+        if (reset) {
+            categoryNewsPages[category] = 1
+            categoryNewsEndReached[category] = false
+            cached.clear()
+        }
+
+        if (page == 1 && cached.isNotEmpty()) {
+            _categoryNewsState.value =
+                _categoryNewsState.value + (category to Result.Success(cached))
             return
         }
 
         viewModelScope.launch {
-            _categoryNewsState.value = Result.Loading
-            val result = getCategoryNewsUseCase(category)
+            categoryNewsLoading[category] = true
+
+            _categoryNewsState.value =
+                _categoryNewsState.value + (category to Result.Loading)
+
+            val result = getCategoryNewsUseCase(category, page, pageSize)
+
             _categoryNewsState.value = when (result) {
                 is Result.Success -> {
-                    cachedCategoryNews[category] = result.data
-                    Result.Success(result.data)
+                    if (result.data.isEmpty()) {
+                        categoryNewsEndReached[category] = true
+                    } else {
+                        cached.addAll(result.data)
+                        categoryNewsPages[category] = page + 1
+                    }
+                    _categoryNewsState.value + (category to Result.Success(cached.toList()))
                 }
-                is Result.Error -> Result.Error("Error fetching news")
-                else -> Result.Idle
+
+                is Result.Error ->
+                    _categoryNewsState.value + (category to Result.Error(result.message))
+
+                else -> _categoryNewsState.value
             }
+
+            categoryNewsLoading[category] = false
         }
     }
+
 
     fun getSources(category: String) {
         cachedSourcesByCategory[category]?.let {

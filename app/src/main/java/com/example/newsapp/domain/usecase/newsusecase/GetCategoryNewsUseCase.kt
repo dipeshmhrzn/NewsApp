@@ -8,7 +8,7 @@ import javax.inject.Inject
 class GetCategoryNewsUseCase @Inject constructor (
     private val repository: NewsRepository
 ){
-    suspend operator fun invoke(category: String): Result<List<Article>> {
-        return repository.getCategoryNews(category)
+    suspend operator fun invoke(category: String, page:Int=1, pageSize: Int=20): Result<List<Article>> {
+        return repository.getCategoryNews(category,page,pageSize)
     }
 }

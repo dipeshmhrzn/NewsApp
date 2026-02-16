@@ -1,6 +1,6 @@
 package com.example.newsapp.presentation.mainscreen.homescreen
 
-import android.content.Intent
+import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -57,6 +57,7 @@ import com.example.newsapp.presentation.viewmodels.NewsViewModel
 import com.example.newsapp.ui.theme.InterDisplay
 import com.example.newsapp.ui.theme.PlayFairDisplay
 
+@SuppressLint("FrequentlyChangingValue")
 @Composable
 fun HomeScreen(
     onSeeAll: () -> Unit,
@@ -72,7 +73,7 @@ fun HomeScreen(
     ) { }
 
     val newsState by viewModel.newsState.collectAsState()
-    val categoryNewsState by viewModel.categoryNewsState.collectAsState()
+    val bookmarkState by bookmarkViewModel.uiState.collectAsState()
 
     val newsCategories = listOf(
         "Business",
@@ -86,13 +87,16 @@ fun HomeScreen(
 
     var selectedCategory by remember { mutableStateOf("Business") }
 
+    val categoryNewsMap by viewModel.categoryNewsState.collectAsState()
+    val categoryNewsState = categoryNewsMap[selectedCategory]
+        ?: Result.Idle
 
     val listState = rememberLazyListState()
+    val topHeadlinesState = rememberLazyListState()
 
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val cardWidth = screenWidth * 0.9f
 
-    val bookmarkState by bookmarkViewModel.uiState.collectAsState()
 
     LaunchedEffect(bookmarkState.message) {
         bookmarkState.message?.let { msg ->
@@ -100,6 +104,26 @@ fun HomeScreen(
             bookmarkViewModel.clearMessage()
         }
     }
+
+
+    LaunchedEffect(topHeadlinesState.firstVisibleItemIndex, topHeadlinesState.layoutInfo.totalItemsCount) {
+        val lastVisibleItem = topHeadlinesState.firstVisibleItemIndex +
+                topHeadlinesState.layoutInfo.visibleItemsInfo.size
+        val totalItems = topHeadlinesState.layoutInfo.totalItemsCount
+        if (lastVisibleItem >= totalItems - 3) {
+            viewModel.getTopHeadlines()
+        }
+    }
+
+    LaunchedEffect(listState.firstVisibleItemIndex, listState.layoutInfo.totalItemsCount) {
+        val lastVisibleItem = listState.firstVisibleItemIndex +
+                listState.layoutInfo.visibleItemsInfo.size
+        val totalItems = listState.layoutInfo.totalItemsCount
+        if (lastVisibleItem >= totalItems - 5) {
+            viewModel.getCategoryNews(selectedCategory)
+        }
+    }
+
 
     LazyColumn(
         state = listState,
@@ -129,8 +153,7 @@ fun HomeScreen(
                     )
                 }
             }
-            LazyRow {
-
+            LazyRow(state = topHeadlinesState) {
                 when (val state = newsState) {
                     is Result.Success -> {
                         val topHeadlines = state.data

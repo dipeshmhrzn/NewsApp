@@ -14,12 +14,16 @@ class NewsApiServices(
     suspend fun getTopHeadlines(
         country: String? = "us",
         category: String? = null,
-        sourceId: String? = null
+        sourceId: String? = null,
+        page: Int = 1,
+        pageSize: Int = 20
     ): NewsDto {
         return httpClient.get("top-headlines") {
             parameter("country", country)
             parameter("category", category)
             parameter("sources", sourceId)
+            parameter("page",page)
+            parameter("pageSize",pageSize)
             parameter("apiKey", BuildConfig.API_KEY)
         }.body<NewsDto>()
     }

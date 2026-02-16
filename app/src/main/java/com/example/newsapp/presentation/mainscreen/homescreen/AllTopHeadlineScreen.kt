@@ -1,13 +1,19 @@
 package com.example.newsapp.presentation.mainscreen.homescreen
 
+import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -26,6 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -35,21 +42,30 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.newsapp.data.dto.topheadlines.Article
+import com.example.newsapp.domain.util.Result
 import com.example.newsapp.presentation.mainscreen.components.MenuItems
+import com.example.newsapp.presentation.mainscreen.homescreen.components.ShimmeredTopHeadlineCard
 import com.example.newsapp.presentation.mainscreen.homescreen.components.TopHeadLinesCard
 import com.example.newsapp.presentation.utils.getRelativeTime
 import com.example.newsapp.presentation.utils.openWebsite
 import com.example.newsapp.presentation.utils.shareUrlIntent
 import com.example.newsapp.presentation.viewmodels.BookmarkViewModel
+import com.example.newsapp.presentation.viewmodels.NewsViewModel
+import com.example.newsapp.ui.theme.InterDisplay
 import com.example.newsapp.ui.theme.PlayFairDisplay
 
+@SuppressLint("FrequentlyChangingValue")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AllTopHeadlineScreen(
     navHostController: NavHostController,
-    articles: List<Article>,
+    viewModel: NewsViewModel,
     bookmarkViewModel: BookmarkViewModel = hiltViewModel()
 ) {
+
+    val newsState by viewModel.newsState.collectAsState()
+
+    val topHeadlinesState = rememberLazyListState()
 
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val context = LocalContext.current
@@ -68,6 +84,16 @@ fun AllTopHeadlineScreen(
             bookmarkViewModel.clearMessage()
         }
     }
+
+    LaunchedEffect(topHeadlinesState.firstVisibleItemIndex,topHeadlinesState.layoutInfo.totalItemsCount) {
+        val lastVisibleItem = topHeadlinesState.firstVisibleItemIndex +
+                topHeadlinesState.layoutInfo.visibleItemsInfo.size
+        val totalItems = topHeadlinesState.layoutInfo.totalItemsCount
+        if (lastVisibleItem >= totalItems - 3) {
+            viewModel.getTopHeadlines()
+        }
+    }
+
 
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
@@ -99,42 +125,60 @@ fun AllTopHeadlineScreen(
             containerColor = Color(0xFFFFFFFF)
         ) { paddingValues ->
 
-            if (articles.isEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .padding(paddingValues)
-                        .fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "No articles available",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Normal,
-                    )
-                }
-            } else {
-                LazyColumn(
-                    modifier = Modifier.padding(paddingValues)
-                ) {
-                    items(articles) { article ->
-                        Box(
-                            modifier = Modifier.padding(8.dp)
-                        ) {
-                            TopHeadLinesCard(
-                                screenWidth = screenWidth,
-                                onCardClick = {
-                                    openWebsite(context, article.url)
-                                },
-                                onMenuClick = {
-                                    selectedArticle = article
-                                    isMenuVisible = !isMenuVisible
-                                },
-                                urlToImage = article.urlToImage,
-                                author = article.author ?: "",
-                                title = article.title,
-                                sourceName = article.source.name,
-                                publishedAt = getRelativeTime(article.publishedAt)
-                            )
+            LazyColumn(
+                state = topHeadlinesState,
+                modifier = Modifier.padding(paddingValues)
+            ) {
+                when (val state = newsState) {
+                    is Result.Success -> {
+                        val topHeadlines = state.data
+                        items(topHeadlines) { item ->
+                            Box(
+                                modifier = Modifier.padding(start = 8.dp, top = 8.dp, bottom = 8.dp)
+                            ) {
+                                TopHeadLinesCard(
+                                    screenWidth = screenWidth,
+                                    onCardClick = {
+                                        openWebsite(context, item.url)
+                                    },
+                                    onMenuClick = {
+                                        selectedArticle = item
+                                        isMenuVisible = !isMenuVisible
+                                    },
+                                    urlToImage = item.urlToImage,
+                                    author = item.author ?: "",
+                                    title = item.title,
+                                    sourceName = item.source.name,
+                                    publishedAt = getRelativeTime(item.publishedAt)
+                                )
+                            }
+                        }
+                    }
+
+                    Result.Idle, Result.Loading -> {
+                        items(8) {
+                            ShimmeredTopHeadlineCard(true)
+                        }
+                    }
+
+                    is Result.Error -> {
+                        items(5) {
+                            Box(
+                                modifier = Modifier
+                                    .width(screenWidth)
+                                    .padding(16.dp)
+                                    .height(150.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(Color(0xFF737373).copy(alpha = .1f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = state.message.toString(),
+                                    fontSize = 18.sp,
+                                    fontFamily = InterDisplay,
+                                    fontWeight = FontWeight.Normal,
+                                )
+                            }
                         }
                     }
                 }
@@ -147,7 +191,7 @@ fun AllTopHeadlineScreen(
                 onDismiss = {
                     isMenuVisible = false
                 },
-                onSaveClick = {article ->
+                onSaveClick = { article ->
                     bookmarkViewModel.toggleBookmark(article)
                 },
                 onShareClick = { article ->

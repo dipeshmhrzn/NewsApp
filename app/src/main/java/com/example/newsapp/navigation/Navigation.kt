@@ -31,7 +31,6 @@ fun Navigation() {
     val navController = rememberNavController()
 
     val newsViewModel: NewsViewModel = hiltViewModel()
-    val newsState by newsViewModel.newsState.collectAsState()
 
     val authDataStoreViewModel: AuthDataStoreViewModel = hiltViewModel()
     val authDataStoreState by authDataStoreViewModel.authDataStoreState.collectAsState()
@@ -187,12 +186,9 @@ fun Navigation() {
                 )
             }
         ) {
-
-            val articles = (newsState as? Result.Success)?.data ?: emptyList()
-
             AllTopHeadlineScreen(
                 navHostController = navController,
-                articles = articles
+                viewModel = newsViewModel
             )
         }
 

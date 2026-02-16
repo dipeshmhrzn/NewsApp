@@ -11,9 +11,9 @@ class NewsRepositoryImpl(
     private val newsApiServices: NewsApiServices
 ) : NewsRepository {
 
-    override suspend fun getTopHeadlines(): Result<List<Article>> {
+    override suspend fun getTopHeadlines(page:Int, pageSize: Int): Result<List<Article>> {
         return try {
-            val topHeadlinesResponse = newsApiServices.getTopHeadlines()
+            val topHeadlinesResponse = newsApiServices.getTopHeadlines(page=page, pageSize = pageSize)
             Log.d("NewsRepositoryImpl", "getTopHeadlines: ${topHeadlinesResponse.articles}")
             Result.Success(topHeadlinesResponse.articles)
         } catch (e: Exception) {
@@ -21,9 +21,9 @@ class NewsRepositoryImpl(
         }
     }
 
-    override suspend fun getCategoryNews(category: String): Result<List<Article>> {
+    override suspend fun getCategoryNews(category: String, page: Int, pageSize: Int): Result<List<Article>> {
         return try {
-            val categoryNewsResponse = newsApiServices.getTopHeadlines(category = category)
+            val categoryNewsResponse = newsApiServices.getTopHeadlines(category = category, page = page, pageSize = pageSize)
             Log.d(
                 "NewsRepositoryImpl",
                 "CategoryNews: ${categoryNewsResponse.articles.size},${categoryNewsResponse.totalResults}"
@@ -44,9 +44,9 @@ class NewsRepositoryImpl(
         }
     }
 
-    override suspend fun getNewsBySources(sourceId: String): Result<List<Article>> {
+    override suspend fun getNewsBySources(sourceId: String, page: Int, pageSize: Int): Result<List<Article>> {
         return try {
-            val sourceNewsResponse = newsApiServices.getTopHeadlines(country = null, sourceId = sourceId)
+            val sourceNewsResponse = newsApiServices.getTopHeadlines(country = null, sourceId = sourceId, page = page, pageSize = pageSize)
             Log.d("SourcesNews", "getTopHeadlines: ${sourceNewsResponse.articles}")
             Result.Success(sourceNewsResponse.articles)
         } catch (e: Exception) {
