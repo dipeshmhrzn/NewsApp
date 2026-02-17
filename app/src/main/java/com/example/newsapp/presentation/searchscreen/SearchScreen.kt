@@ -1,6 +1,5 @@
 package com.example.newsapp.presentation.searchscreen
 
-import android.content.Intent
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -39,7 +38,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -49,7 +47,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.newsapp.domain.util.Result
 import com.example.newsapp.presentation.mainscreen.homescreen.components.NewsCard
 import com.example.newsapp.presentation.mainscreen.homescreen.components.ShimmeredNewsCard
-import com.example.newsapp.presentation.utils.findActivity
 import com.example.newsapp.presentation.utils.getRelativeTime
 import com.example.newsapp.presentation.utils.openWebsite
 import com.example.newsapp.presentation.utils.shareUrlIntent
@@ -70,7 +67,6 @@ fun SearchScreen(
 
     val focusRequester = remember { FocusRequester() }
 
-    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val context = LocalContext.current
 
     val shareLauncher = rememberLauncherForActivityResult(
@@ -246,7 +242,7 @@ fun SearchScreen(
                         ) {
                             Spacer(modifier = Modifier.height(150.dp))
                             Text(
-                                text = state.message.toString(),
+                                text = "Unable to perform search for keyword: \"$query\".",
                                 fontSize = 20.sp,
                                 fontFamily = InterDisplay,
                                 fontWeight = FontWeight.Normal

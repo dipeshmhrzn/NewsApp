@@ -4,12 +4,9 @@ import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -85,7 +82,10 @@ fun AllTopHeadlineScreen(
         }
     }
 
-    LaunchedEffect(topHeadlinesState.firstVisibleItemIndex,topHeadlinesState.layoutInfo.totalItemsCount) {
+    LaunchedEffect(
+        topHeadlinesState.firstVisibleItemIndex,
+        topHeadlinesState.layoutInfo.totalItemsCount
+    ) {
         val lastVisibleItem = topHeadlinesState.firstVisibleItemIndex +
                 topHeadlinesState.layoutInfo.visibleItemsInfo.size
         val totalItems = topHeadlinesState.layoutInfo.totalItemsCount
@@ -124,62 +124,71 @@ fun AllTopHeadlineScreen(
             },
             containerColor = Color(0xFFFFFFFF)
         ) { paddingValues ->
-
-            LazyColumn(
-                state = topHeadlinesState,
-                modifier = Modifier.padding(paddingValues)
-            ) {
-                when (val state = newsState) {
-                    is Result.Success -> {
-                        val topHeadlines = state.data
-                        items(topHeadlines) { item ->
-                            Box(
-                                modifier = Modifier.padding(start = 8.dp, top = 8.dp, bottom = 8.dp)
-                            ) {
-                                TopHeadLinesCard(
-                                    screenWidth = screenWidth,
-                                    onCardClick = {
-                                        openWebsite(context, item.url)
-                                    },
-                                    onMenuClick = {
-                                        selectedArticle = item
-                                        isMenuVisible = !isMenuVisible
-                                    },
-                                    urlToImage = item.urlToImage,
-                                    author = item.author ?: "",
-                                    title = item.title,
-                                    sourceName = item.source.name,
-                                    publishedAt = getRelativeTime(item.publishedAt)
-                                )
+            when (val state = newsState) {
+                is Result.Success, Result.Loading, Result.Idle -> {
+                    LazyColumn(
+                        state = topHeadlinesState,
+                        modifier = Modifier.padding(paddingValues)
+                    ) {
+                        when (state) {
+                            is Result.Success -> {
+                                items(state.data, key = { it.url }) { item ->
+                                    Box(
+                                        modifier = Modifier.padding(
+                                            start = 8.dp,
+                                            end = 8.dp,
+                                            bottom = 8.dp
+                                        )
+                                    ) {
+                                        TopHeadLinesCard(
+                                            screenWidth = screenWidth,
+                                            onCardClick = {
+                                                openWebsite(context, item.url)
+                                            },
+                                            onMenuClick = {
+                                                selectedArticle = item
+                                                isMenuVisible = !isMenuVisible
+                                            },
+                                            urlToImage = item.urlToImage,
+                                            author = item.author ?: "",
+                                            title = item.title,
+                                            sourceName = item.source.name,
+                                            publishedAt = getRelativeTime(item.publishedAt)
+                                        )
+                                    }
+                                }
                             }
+
+                            Result.Idle, Result.Loading -> {
+                                items(8) {
+                                    Box(modifier = Modifier.padding(8.dp)) {
+                                        ShimmeredTopHeadlineCard(
+                                            isLoading = true,
+                                            cardWidth = screenWidth
+                                        )
+                                    }
+                                }
+                            }
+
+                            else -> {}
                         }
                     }
+                }
 
-                    Result.Idle, Result.Loading -> {
-                        items(8) {
-                            ShimmeredTopHeadlineCard(true)
-                        }
-                    }
-
-                    is Result.Error -> {
-                        items(5) {
-                            Box(
-                                modifier = Modifier
-                                    .width(screenWidth)
-                                    .padding(16.dp)
-                                    .height(150.dp)
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(Color(0xFF737373).copy(alpha = .1f)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = state.message.toString(),
-                                    fontSize = 18.sp,
-                                    fontFamily = InterDisplay,
-                                    fontWeight = FontWeight.Normal,
-                                )
-                            }
-                        }
+                is Result.Error -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp)
+                            .clip(RoundedCornerShape(8.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Error occurred!",
+                            fontSize = 22.sp,
+                            fontFamily = InterDisplay,
+                            fontWeight = FontWeight.Normal
+                        )
                     }
                 }
             }

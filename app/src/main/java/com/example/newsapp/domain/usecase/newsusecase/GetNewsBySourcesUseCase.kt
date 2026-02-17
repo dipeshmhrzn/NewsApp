@@ -8,7 +8,11 @@ import javax.inject.Inject
 class GetNewsBySourcesUseCase @Inject constructor(
     private val repository: NewsRepository
 ) {
-    suspend operator fun invoke(sourceId: String): Result<List<Article>> {
+    suspend operator fun invoke(
+        sourceId: String,
+        page: Int = 1,
+        pageSize: Int = 20
+    ): Result<List<Article>> {
         return repository.getNewsBySources(sourceId)
     }
 

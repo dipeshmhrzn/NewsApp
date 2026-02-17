@@ -50,11 +50,11 @@ class NewsViewModel @Inject constructor(
     private val _newsBySourcesMap = MutableStateFlow<Map<String, Result<List<Article>>>>(emptyMap())
     val newsBySourcesMap = _newsBySourcesMap.asStateFlow()
 
-    private var topHeadlinesPage =1
+    private var topHeadlinesPage = 1
     private val pageSize = 20
-    private var topHeadlinesEndReached=false
+    private var topHeadlinesEndReached = false
     private var topHeadlinesLoading = false
-    private val cachedTopHeadlines = mutableListOf<Article>()
+    val cachedTopHeadlines = mutableListOf<Article>()
 
     private val categoryNewsPages = mutableMapOf<String, Int>()
     private val categoryNewsEndReached = mutableMapOf<String, Boolean>()
@@ -62,15 +62,20 @@ class NewsViewModel @Inject constructor(
     private val cachedCategoryNews = mutableMapOf<String, MutableList<Article>>()
 
     private val cachedSourcesByCategory = mutableMapOf<String, List<Source>>()
-    private val cachedNewsBySources = mutableMapOf<String, List<Article>>()
 
+    private val newsBySourcesPages = mutableMapOf<String, Int>()
+    private val newsBySourcesEndReached = mutableMapOf<String, Boolean>()
+    private val newsBySourcesLoading = mutableMapOf<String, Boolean>()
+    private val cachedNewsBySources = mutableMapOf<String, MutableList<Article>>()
+
+    private val cachedNewsBySourcesForFollowing = mutableMapOf<String, List<Article>>()
 
     private var searchJob: Job? = null
 
 
     init {
         getTopHeadlines()
-        getCategoryNews("business")
+        getCategoryNews("Business")
     }
 
     fun getTopHeadlines(reset: Boolean = false) {
@@ -97,6 +102,7 @@ class NewsViewModel @Inject constructor(
                         topHeadlinesPage++
                     }
                 }
+
                 is Result.Error -> _newsState.value = Result.Error(result.message)
                 else -> {}
             }
@@ -105,25 +111,27 @@ class NewsViewModel @Inject constructor(
         }
     }
 
-    fun getNewsBySources(sourceId: String) {
-        cachedNewsBySources[sourceId]?.let {
-            _newsBySources.value = Result.Success(it)
-            return
-        }
 
-        viewModelScope.launch {
-            _newsBySources.value = Result.Loading
-            val result = getNewsBySourcesUseCase(sourceId)
-            _newsBySources.value = when (result) {
-                is Result.Success -> {
-                    cachedNewsBySources[sourceId] = result.data
-                    Result.Success(result.data)
-                }
-                is Result.Error -> Result.Error("Error fetching news")
-                else -> Result.Idle
-            }
-        }
-    }
+//    fun getNewsBySourcesForFollowing(sourceId: String) {
+//        cachedNewsBySources[sourceId]?.let {
+//            _newsBySourcesMap.value = _newsBySourcesMap.value + (sourceId to Result.Success(it))
+//            return
+//        }
+//
+//        viewModelScope.launch {
+//            _newsBySourcesMap.value = _newsBySourcesMap.value + (sourceId to Result.Loading)
+//            val result = getNewsBySourcesUseCase(sourceId)
+//            _newsBySourcesMap.value = when (result) {
+//                is Result.Success -> {
+//                    cachedNewsBySourcesForFollowing[sourceId] = result.data
+//                    _newsBySourcesMap.value + (sourceId to result)
+//                }
+//
+//                is Result.Error -> _newsBySourcesMap.value + (sourceId to result)
+//                else -> _newsBySourcesMap.value + (sourceId to Result.Idle)
+//            }
+//        }
+//    }
 
     fun getNewsBySourcesForFollowing(sourceId: String) {
         cachedNewsBySources[sourceId]?.let {
@@ -136,14 +144,15 @@ class NewsViewModel @Inject constructor(
             val result = getNewsBySourcesUseCase(sourceId)
             _newsBySourcesMap.value = when (result) {
                 is Result.Success -> {
-                    cachedNewsBySources[sourceId] = result.data
-                    _newsBySourcesMap.value + (sourceId to result)
+                    cachedNewsBySources[sourceId] = result.data.toMutableList()
+                    _newsBySourcesMap.value + (sourceId to Result.Success(result.data))
                 }
                 is Result.Error -> _newsBySourcesMap.value + (sourceId to result)
                 else -> _newsBySourcesMap.value + (sourceId to Result.Idle)
             }
         }
     }
+
 
     fun getCategoryNews(category: String, reset: Boolean = false) {
         val page = categoryNewsPages.getOrDefault(category, 1)
@@ -194,6 +203,109 @@ class NewsViewModel @Inject constructor(
         }
     }
 
+//    fun getNewsBySources(sourceId: String, reset: Boolean = false) {
+//
+//        val page = newsBySourcesPages.getOrDefault(sourceId, 1)
+//        val endReached = newsBySourcesEndReached.getOrDefault(sourceId, false)
+//        val loading = newsBySourcesLoading.getOrDefault(sourceId, false)
+//        val cached = cachedNewsBySources.getOrPut(sourceId) { mutableListOf() }
+//
+//        if (loading || endReached) return
+//
+//        if (reset) {
+//            newsBySourcesPages[sourceId] = 1
+//            newsBySourcesEndReached[sourceId] = false
+//            cached.clear()
+//        }
+//
+//        if (page == 1 && cached.isNotEmpty()) {
+//            _newsBySources.value = Result.Success(cached.toList())
+//            return
+//        }
+//
+//        viewModelScope.launch {
+//            newsBySourcesLoading[sourceId] = true
+//
+//           _newsBySources.value= if (page == 1) Result.Loading else _newsBySources.value
+//
+//            val result = getNewsBySourcesUseCase(sourceId, page, pageSize)
+//
+//            _newsBySources.value = when (result) {
+//                is Result.Success -> {
+//                    val newArticles = result.data.filter { newArticle ->
+//                        cached.none { it.url == newArticle.url }
+//                    }
+//
+//                    if (newArticles.isEmpty()) {
+//                        newsBySourcesEndReached[sourceId] = true
+//                    } else {
+//                        cached.addAll(newArticles)
+//                        newsBySourcesPages[sourceId] = page + 1
+//                    }
+//
+//                    Result.Success(cached.toList())
+//                }
+//
+//                is Result.Error -> Result.Error(result.message)
+//                else -> Result.Idle
+//            }
+//
+//            newsBySourcesLoading[sourceId] = false
+//        }
+//    }
+
+    fun getNewsBySources(sourceId: String, reset: Boolean = false) {
+        val page = newsBySourcesPages.getOrDefault(sourceId, 1)
+        val endReached = newsBySourcesEndReached.getOrDefault(sourceId, false)
+        val loading = newsBySourcesLoading.getOrDefault(sourceId, false)
+        val cached = cachedNewsBySources.getOrPut(sourceId) { mutableListOf() }
+
+        if (loading || endReached) return
+
+        if (reset) {
+            newsBySourcesPages[sourceId] = 1
+            newsBySourcesEndReached[sourceId] = false
+            cached.clear()
+        }
+
+        if (page == 1 && cached.isNotEmpty()) {
+            _newsBySourcesMap.value = _newsBySourcesMap.value + (sourceId to Result.Success(cached.toList()))
+            return
+        }
+
+        viewModelScope.launch {
+            newsBySourcesLoading[sourceId] = true
+
+            // Show loading only for first page
+            if (page == 1) {
+                _newsBySourcesMap.value = _newsBySourcesMap.value + (sourceId to Result.Loading)
+            }
+
+            val result = getNewsBySourcesUseCase(sourceId, page, 20)
+
+            _newsBySourcesMap.value = when (result) {
+                is Result.Success -> {
+                    val newArticles = result.data.filter { newArticle ->
+                        cached.none { it.url == newArticle.url }
+                    }
+
+                    if (newArticles.isEmpty()) {
+                        newsBySourcesEndReached[sourceId] = true
+                    } else {
+                        cached.addAll(newArticles)
+                        newsBySourcesPages[sourceId] = page + 1
+                    }
+
+                    _newsBySourcesMap.value + (sourceId to Result.Success(cached.toList()))
+                }
+
+                is Result.Error -> _newsBySourcesMap.value + (sourceId to Result.Error(result.message))
+                else -> _newsBySourcesMap.value + (sourceId to Result.Idle)
+            }
+
+            newsBySourcesLoading[sourceId] = false
+        }
+    }
 
     fun getSources(category: String) {
         cachedSourcesByCategory[category]?.let {
@@ -209,6 +321,7 @@ class NewsViewModel @Inject constructor(
                     cachedSourcesByCategory[category] = result.data
                     _sourcesByCategory.value + (category to result)
                 }
+
                 is Result.Error -> _sourcesByCategory.value + (category to result)
                 else -> _sourcesByCategory.value + (category to Result.Idle)
             }
@@ -255,7 +368,6 @@ class NewsViewModel @Inject constructor(
             }
         }
     }
-
 
 
     fun clearSearch() {

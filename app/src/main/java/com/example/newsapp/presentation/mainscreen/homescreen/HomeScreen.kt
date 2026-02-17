@@ -63,17 +63,17 @@ fun HomeScreen(
     onSeeAll: () -> Unit,
     onMenuClick: (item: Article) -> Unit,
     viewModel: NewsViewModel,
-    bookmarkViewModel: BookmarkViewModel= hiltViewModel()
+    bookmarkViewModel: BookmarkViewModel = hiltViewModel()
 ) {
 
     val context = LocalContext.current
-
     val shareLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { }
 
     val newsState by viewModel.newsState.collectAsState()
     val bookmarkState by bookmarkViewModel.uiState.collectAsState()
+    val categoryNewsMap by viewModel.categoryNewsState.collectAsState()
 
     val newsCategories = listOf(
         "Business",
@@ -86,10 +86,7 @@ fun HomeScreen(
     )
 
     var selectedCategory by remember { mutableStateOf("Business") }
-
-    val categoryNewsMap by viewModel.categoryNewsState.collectAsState()
-    val categoryNewsState = categoryNewsMap[selectedCategory]
-        ?: Result.Idle
+    val categoryNewsState = categoryNewsMap[selectedCategory] ?: Result.Idle
 
     val listState = rememberLazyListState()
     val topHeadlinesState = rememberLazyListState()
@@ -106,11 +103,14 @@ fun HomeScreen(
     }
 
 
-    LaunchedEffect(topHeadlinesState.firstVisibleItemIndex, topHeadlinesState.layoutInfo.totalItemsCount) {
+    LaunchedEffect(
+        topHeadlinesState.firstVisibleItemIndex,
+        topHeadlinesState.layoutInfo.totalItemsCount
+    ) {
         val lastVisibleItem = topHeadlinesState.firstVisibleItemIndex +
                 topHeadlinesState.layoutInfo.visibleItemsInfo.size
         val totalItems = topHeadlinesState.layoutInfo.totalItemsCount
-        if (lastVisibleItem >= totalItems - 3) {
+        if (lastVisibleItem >= totalItems - 5) {
             viewModel.getTopHeadlines()
         }
     }
@@ -153,22 +153,19 @@ fun HomeScreen(
                     )
                 }
             }
+
             LazyRow(state = topHeadlinesState) {
                 when (val state = newsState) {
                     is Result.Success -> {
-                        val topHeadlines = state.data
-                        items(topHeadlines) { item ->
+                        val articles = state.data
+                        items(articles) { item ->
                             Box(
                                 modifier = Modifier.padding(start = 8.dp, top = 8.dp, bottom = 8.dp)
                             ) {
                                 TopHeadLinesCard(
                                     screenWidth = cardWidth,
-                                    onCardClick = {
-                                        openWebsite(context, item.url)
-                                    },
-                                    onMenuClick = {
-                                        onMenuClick(item)
-                                    },
+                                    onCardClick = { openWebsite(context, item.url) },
+                                    onMenuClick = { onMenuClick(item) },
                                     urlToImage = item.urlToImage,
                                     author = item.author ?: "",
                                     title = item.title,
@@ -180,7 +177,7 @@ fun HomeScreen(
                     }
 
                     Result.Idle, Result.Loading -> {
-                        items(8) {
+                        items(5) {
                             ShimmeredTopHeadlineCard(true)
                         }
                     }
@@ -197,7 +194,7 @@ fun HomeScreen(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = state.message.toString(),
+                                    text = "Error fetching top headlines",
                                     fontSize = 18.sp,
                                     fontFamily = InterDisplay,
                                     fontWeight = FontWeight.Normal,
@@ -261,12 +258,12 @@ fun HomeScreen(
                 val categoryNews = state.data
                 items(categoryNews) { item ->
                     Box(
-                        modifier = Modifier.padding(start = 8.dp, top = 8.dp, bottom = 8.dp)
+                        modifier = Modifier.padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
                     ) {
                         val isBookmarked = bookmarkState.bookmarks.any { it.url == item.url }
 
                         NewsCard(
-                            isBookmarked=isBookmarked,
+                            isBookmarked = isBookmarked,
                             urlToImage = item.urlToImage,
                             title = item.title,
                             sourceName = item.source.name,
@@ -303,7 +300,7 @@ fun HomeScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = state.message.toString(),
+                            text = "Error fetching $selectedCategory news",
                             fontSize = 18.sp,
                             fontFamily = InterDisplay,
                             fontWeight = FontWeight.Normal,

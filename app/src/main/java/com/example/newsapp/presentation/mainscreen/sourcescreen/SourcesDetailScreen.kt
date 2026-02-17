@@ -1,19 +1,18 @@
 package com.example.newsapp.presentation.mainscreen.sourcescreen
 
+import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -58,6 +57,7 @@ import com.example.newsapp.presentation.viewmodels.NewsViewModel
 import com.example.newsapp.ui.theme.InterDisplay
 import com.example.newsapp.ui.theme.PlayFairDisplay
 
+@SuppressLint("FrequentlyChangingValue")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SourcesDetailScreen(
@@ -68,6 +68,7 @@ fun SourcesDetailScreen(
     bookmarkViewModel: BookmarkViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
+    val listState = rememberLazyListState()
 
     val shareLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -77,11 +78,8 @@ fun SourcesDetailScreen(
         .followedSourceIds
         .collectAsState()
 
-    LaunchedEffect(sourceId) {
-        viewModel.getNewsBySources(sourceId)
-    }
-
-    val newsBySources by viewModel.newsBySources.collectAsState()
+    val newsBySourcesMap by viewModel.newsBySourcesMap.collectAsState()
+    val newsBySources = newsBySourcesMap[sourceId] ?: Result.Loading
 
     val sourceTitle = when (val state = newsBySources) {
         is Result.Success -> state.data.firstOrNull()?.source?.name ?: "News"
@@ -92,10 +90,23 @@ fun SourcesDetailScreen(
 
     val bookmarkState by bookmarkViewModel.uiState.collectAsState()
 
+    LaunchedEffect(sourceId) {
+        viewModel.getNewsBySources(sourceId)
+    }
+
     LaunchedEffect(bookmarkState.message) {
         bookmarkState.message?.let { msg ->
             Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
             bookmarkViewModel.clearMessage()
+        }
+    }
+
+    LaunchedEffect(listState.firstVisibleItemIndex, listState.layoutInfo.totalItemsCount) {
+        val lastVisibleItem =
+            listState.firstVisibleItemIndex + listState.layoutInfo.visibleItemsInfo.size
+        val totalItems = listState.layoutInfo.totalItemsCount
+        if (lastVisibleItem >= totalItems - 5) {
+            viewModel.getNewsBySources(sourceId)
         }
     }
 
@@ -159,63 +170,64 @@ fun SourcesDetailScreen(
             },
             containerColor = Color(0xFFFFFFFF)
         ) { paddingValues ->
-            LazyColumn(
-                modifier = Modifier.padding(paddingValues)
-            ) {
-
-                when (val state = newsBySources) {
-                    is Result.Success -> {
-                        val articles = state.data
-                        items(articles) { article ->
-                            Box(
-                                modifier = Modifier.padding(8.dp)
-                            ) {
-                                SourceNewsCard(
-                                    onCardClick = {
-                                        openWebsite(context, article.url)
-                                    },
-                                    onMenuClick = {
-                                        selectedArticle = article
-                                        isMenuVisible = !isMenuVisible
-                                    },
-                                    urlToImage = article.urlToImage,
-                                    author = article.author ?: "",
-                                    title = article.title,
-                                    publishedAt = getRelativeTime(article.publishedAt)
-                                )
+            when (val state = newsBySources) {
+                is Result.Success, Result.Loading, Result.Idle -> {
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier.padding(paddingValues)
+                    ) {
+                        when (state) {
+                            is Result.Success -> {
+                                items(state.data, key = { it.url }) { article ->
+                                    Box(
+                                        modifier = Modifier.padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
+                                    ) {
+                                        SourceNewsCard(
+                                            onCardClick = {
+                                                openWebsite(context, article.url)
+                                            },
+                                            onMenuClick = {
+                                                selectedArticle = article
+                                                isMenuVisible = !isMenuVisible
+                                            },
+                                            urlToImage = article.urlToImage,
+                                            author = article.author ?: "",
+                                            title = article.title,
+                                            publishedAt = getRelativeTime(article.publishedAt)
+                                        )
+                                    }
+                                }
                             }
-                        }
 
-                    }
-
-                    Result.Idle, Result.Loading -> {
-                        items(8) {
-                            ShimmeredSourceNewsCard(true)
-                        }
-                    }
-
-                    is Result.Error -> {
-                        items(5) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp)
-                                    .height(150.dp)
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(Color(0xFF737373).copy(alpha = .1f)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = state.message.toString(),
-                                    fontSize = 18.sp,
-                                    fontFamily = InterDisplay,
-                                    fontWeight = FontWeight.Normal,
-                                )
+                            Result.Idle, Result.Loading -> {
+                                items(8) {
+                                    Box(modifier = Modifier.padding(8.dp)) {
+                                        ShimmeredSourceNewsCard(true)
+                                    }
+                                }
                             }
+
+                            else -> {}
                         }
                     }
                 }
 
+                is Result.Error -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp)
+                            .clip(RoundedCornerShape(8.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Unable to fetch news from source :\"$sourceId\"",
+                            fontSize = 18.sp,
+                            fontFamily = InterDisplay,
+                            fontWeight = FontWeight.Normal,
+                        )
+                    }
+                }
             }
         }
         if (isMenuVisible) {
@@ -225,7 +237,7 @@ fun SourcesDetailScreen(
                 onDismiss = {
                     isMenuVisible = false
                 },
-                onSaveClick = {article ->
+                onSaveClick = { article ->
                     bookmarkViewModel.toggleBookmark(article)
                 },
                 onShareClick = { article ->

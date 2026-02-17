@@ -202,11 +202,17 @@ fun FollowingScreen(
 
                 is Result.Error -> {
                     item {
+                        Box(
+                            modifier = Modifier.fillMaxWidth().background(Color.White).height(50.dp).padding(8.dp),
+                            contentAlignment = Alignment.Center
+                        ){
                         Text(
                             text = "Failed to load news for $sourceId",
-                            color = Color.Red,
-                            modifier = Modifier.padding(16.dp)
-                        )
+                            color = Color.Black,
+                            fontFamily = InterDisplay,
+                            fontSize = 18.sp
+                        )}
+                        Spacer(modifier = Modifier.height(8.dp))
                     }
                 }
 

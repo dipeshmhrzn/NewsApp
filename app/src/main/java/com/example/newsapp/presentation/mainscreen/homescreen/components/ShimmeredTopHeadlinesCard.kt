@@ -32,6 +32,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.SubcomposeAsyncImage
@@ -43,10 +44,11 @@ import com.google.accompanist.placeholder.material.placeholder
 import com.google.accompanist.placeholder.shimmer
 
 @Composable
-fun ShimmeredTopHeadlineCard(isLoading: Boolean = false) {
+fun ShimmeredTopHeadlineCard(
+    isLoading: Boolean = false,
+    cardWidth: Dp = LocalConfiguration.current.screenWidthDp.dp * 0.9f
+) {
 
-    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-    val cardWidth = screenWidth * 0.9f
 
     if (isLoading) {
         Box(
