@@ -1,5 +1,6 @@
 package com.example.newsapp.presentation.searchscreen
 
+import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -54,6 +56,7 @@ import com.example.newsapp.presentation.viewmodels.BookmarkViewModel
 import com.example.newsapp.presentation.viewmodels.NewsViewModel
 import com.example.newsapp.ui.theme.InterDisplay
 
+@SuppressLint("FrequentlyChangingValue")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
@@ -75,6 +78,8 @@ fun SearchScreen(
 
     val bookmarkState by bookmarkViewModel.uiState.collectAsState()
 
+    val searchListState = rememberLazyListState()
+
     LaunchedEffect(bookmarkState.message) {
         bookmarkState.message?.let { msg ->
             Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
@@ -85,6 +90,18 @@ fun SearchScreen(
 
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
+    }
+
+    LaunchedEffect(
+        searchListState.firstVisibleItemIndex,
+        searchListState.layoutInfo.totalItemsCount
+    ) {
+        val lastVisibleItem =searchListState.firstVisibleItemIndex + searchListState.layoutInfo.visibleItemsInfo.size
+        val totalItems = searchListState.layoutInfo.totalItemsCount
+
+        if (lastVisibleItem>=totalItems-5 && searchState is Result.Success && query.isNotBlank()){
+            newsViewModel.searchNews(query)
+        }
     }
 
     Scaffold(
@@ -99,7 +116,7 @@ fun SearchScreen(
                     value = query,
                     onValueChange = {
                         query = it
-                        newsViewModel.searchNews(it)
+                        newsViewModel.searchNews(query=it, reset = true)
                     },
                     placeholder = {
                         Text(
@@ -151,6 +168,7 @@ fun SearchScreen(
     ) { paddingValues ->
 
         LazyColumn(
+            state = searchListState,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
@@ -185,7 +203,7 @@ fun SearchScreen(
                                 modifier = Modifier.padding(8.dp)
                             ) {
                                 NewsCard(
-                                    isBookmarked=isBookmarked,
+                                    isBookmarked = isBookmarked,
                                     urlToImage = article.urlToImage,
                                     title = article.title,
                                     sourceName = article.source.name,

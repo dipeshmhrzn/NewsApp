@@ -33,7 +33,8 @@ class NewsViewModel @Inject constructor(
     private val _newsState = MutableStateFlow<Result<List<Article>>>(Result.Idle)
     val newsState = _newsState.asStateFlow()
 
-    private val _categoryNewsState = MutableStateFlow<Map<String, Result<List<Article>>>>(emptyMap())
+    private val _categoryNewsState =
+        MutableStateFlow<Map<String, Result<List<Article>>>>(emptyMap())
 
     val categoryNewsState = _categoryNewsState.asStateFlow()
 
@@ -43,9 +44,6 @@ class NewsViewModel @Inject constructor(
 
     private val _sourcesByCategory = MutableStateFlow<Map<String, Result<List<Source>>>>(emptyMap())
     val sourcesByCategory = _sourcesByCategory.asStateFlow()
-
-    private val _newsBySources = MutableStateFlow<Result<List<Article>>>(Result.Idle)
-    val newsBySources = _newsBySources.asStateFlow()
 
     private val _newsBySourcesMap = MutableStateFlow<Map<String, Result<List<Article>>>>(emptyMap())
     val newsBySourcesMap = _newsBySourcesMap.asStateFlow()
@@ -68,9 +66,15 @@ class NewsViewModel @Inject constructor(
     private val newsBySourcesLoading = mutableMapOf<String, Boolean>()
     private val cachedNewsBySources = mutableMapOf<String, MutableList<Article>>()
 
-    private val cachedNewsBySourcesForFollowing = mutableMapOf<String, List<Article>>()
-
     private var searchJob: Job? = null
+
+    private var searchPage = 1
+    private var searchPageSize = 50
+    private var searchEndReached = false
+    private var searchLoading = false
+    private val cachedSearch = mutableListOf<Article>()
+
+    private var currentSearchQuery: String = ""
 
 
     init {
@@ -111,28 +115,6 @@ class NewsViewModel @Inject constructor(
         }
     }
 
-
-//    fun getNewsBySourcesForFollowing(sourceId: String) {
-//        cachedNewsBySources[sourceId]?.let {
-//            _newsBySourcesMap.value = _newsBySourcesMap.value + (sourceId to Result.Success(it))
-//            return
-//        }
-//
-//        viewModelScope.launch {
-//            _newsBySourcesMap.value = _newsBySourcesMap.value + (sourceId to Result.Loading)
-//            val result = getNewsBySourcesUseCase(sourceId)
-//            _newsBySourcesMap.value = when (result) {
-//                is Result.Success -> {
-//                    cachedNewsBySourcesForFollowing[sourceId] = result.data
-//                    _newsBySourcesMap.value + (sourceId to result)
-//                }
-//
-//                is Result.Error -> _newsBySourcesMap.value + (sourceId to result)
-//                else -> _newsBySourcesMap.value + (sourceId to Result.Idle)
-//            }
-//        }
-//    }
-
     fun getNewsBySourcesForFollowing(sourceId: String) {
         cachedNewsBySources[sourceId]?.let {
             _newsBySourcesMap.value = _newsBySourcesMap.value + (sourceId to Result.Success(it))
@@ -147,6 +129,7 @@ class NewsViewModel @Inject constructor(
                     cachedNewsBySources[sourceId] = result.data.toMutableList()
                     _newsBySourcesMap.value + (sourceId to Result.Success(result.data))
                 }
+
                 is Result.Error -> _newsBySourcesMap.value + (sourceId to result)
                 else -> _newsBySourcesMap.value + (sourceId to Result.Idle)
             }
@@ -203,57 +186,6 @@ class NewsViewModel @Inject constructor(
         }
     }
 
-//    fun getNewsBySources(sourceId: String, reset: Boolean = false) {
-//
-//        val page = newsBySourcesPages.getOrDefault(sourceId, 1)
-//        val endReached = newsBySourcesEndReached.getOrDefault(sourceId, false)
-//        val loading = newsBySourcesLoading.getOrDefault(sourceId, false)
-//        val cached = cachedNewsBySources.getOrPut(sourceId) { mutableListOf() }
-//
-//        if (loading || endReached) return
-//
-//        if (reset) {
-//            newsBySourcesPages[sourceId] = 1
-//            newsBySourcesEndReached[sourceId] = false
-//            cached.clear()
-//        }
-//
-//        if (page == 1 && cached.isNotEmpty()) {
-//            _newsBySources.value = Result.Success(cached.toList())
-//            return
-//        }
-//
-//        viewModelScope.launch {
-//            newsBySourcesLoading[sourceId] = true
-//
-//           _newsBySources.value= if (page == 1) Result.Loading else _newsBySources.value
-//
-//            val result = getNewsBySourcesUseCase(sourceId, page, pageSize)
-//
-//            _newsBySources.value = when (result) {
-//                is Result.Success -> {
-//                    val newArticles = result.data.filter { newArticle ->
-//                        cached.none { it.url == newArticle.url }
-//                    }
-//
-//                    if (newArticles.isEmpty()) {
-//                        newsBySourcesEndReached[sourceId] = true
-//                    } else {
-//                        cached.addAll(newArticles)
-//                        newsBySourcesPages[sourceId] = page + 1
-//                    }
-//
-//                    Result.Success(cached.toList())
-//                }
-//
-//                is Result.Error -> Result.Error(result.message)
-//                else -> Result.Idle
-//            }
-//
-//            newsBySourcesLoading[sourceId] = false
-//        }
-//    }
-
     fun getNewsBySources(sourceId: String, reset: Boolean = false) {
         val page = newsBySourcesPages.getOrDefault(sourceId, 1)
         val endReached = newsBySourcesEndReached.getOrDefault(sourceId, false)
@@ -269,7 +201,8 @@ class NewsViewModel @Inject constructor(
         }
 
         if (page == 1 && cached.isNotEmpty()) {
-            _newsBySourcesMap.value = _newsBySourcesMap.value + (sourceId to Result.Success(cached.toList()))
+            _newsBySourcesMap.value =
+                _newsBySourcesMap.value + (sourceId to Result.Success(cached.toList()))
             return
         }
 
@@ -328,50 +261,74 @@ class NewsViewModel @Inject constructor(
         }
     }
 
-    fun searchNews(query: String) {
-        // Cancel any ongoing search job
-        searchJob?.cancel()
-
-        // If query is blank, reset state
+    fun searchNews(query: String, reset: Boolean = false) {
         if (query.isBlank()) {
-            _searchState.value = Result.Idle
+            clearSearch()
             return
         }
 
+        if (searchLoading || searchEndReached) return
+
+        if (reset || query != currentSearchQuery) {
+            searchJob?.cancel()
+            currentSearchQuery = query
+            searchPage = 1
+            searchEndReached = false
+            cachedSearch.clear()
+        }
         searchJob = viewModelScope.launch {
             try {
-                // Debounce: wait a little before sending search request
-                delay(400)
+                searchLoading = true
 
-                // Check if coroutine was cancelled during delay
-                if (!isActive) return@launch
+                if (searchPage == 1) {
+                    delay(400)
+                    _searchState.value = Result.Loading
+                }
+                val result = searchNewsUseCase(
+                    query = query,
+                    page = searchPage,
+                    pageSize = searchPageSize
+                )
 
-                // Set loading state
-                _searchState.value = Result.Loading
+                when (result) {
+                    is Result.Success -> {
+                        val newArticles = result.data.filter { newArticle ->
+                            cachedSearch.none {
+                                it.url == newArticle.url
+                            }
+                        }
 
-                // Call the search use case
-                val result = searchNewsUseCase(query)
-
-                // Update state only if coroutine still active
-                if (isActive) {
-                    _searchState.value = when (result) {
-                        is Result.Success -> Result.Success(result.data)
-                        is Result.Error -> Result.Error(result.message)
-                        else -> Result.Idle
+                        if (newArticles.isEmpty()){
+                            searchEndReached=true
+                        }else{
+                            cachedSearch.addAll(newArticles)
+                            searchPage++
+                        }
+                        _searchState.value= Result.Success(cachedSearch.toList())
                     }
+                    is Result.Error -> {
+                        _searchState.value= Result.Error(result.message)
+                    }
+                    else->{}
                 }
-
-            } catch (e: Exception) {
+            }catch (e: Exception) {
                 if (e !is CancellationException) {
-                    _searchState.value = Result.Error("Failed to search news.")
+                    _searchState.value =
+                        Result.Error("Failed to search news.")
                 }
+            } finally {
+                searchLoading = false
             }
         }
     }
 
-
     fun clearSearch() {
         searchJob?.cancel()
+        searchPage = 1
+        searchEndReached = false
+        searchLoading = false
+        currentSearchQuery = ""
+        cachedSearch.clear()
         _searchState.value = Result.Idle
     }
 

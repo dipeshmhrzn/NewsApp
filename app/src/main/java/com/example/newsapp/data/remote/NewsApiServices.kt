@@ -22,8 +22,8 @@ class NewsApiServices(
             parameter("country", country)
             parameter("category", category)
             parameter("sources", sourceId)
-            parameter("page",page)
-            parameter("pageSize",pageSize)
+            parameter("page", page)
+            parameter("pageSize", pageSize)
             parameter("apiKey", BuildConfig.API_KEY)
         }.body<NewsDto>()
     }
@@ -35,9 +35,11 @@ class NewsApiServices(
         }.body<SourcesDto>()
     }
 
-    suspend fun searchNews(query: String): NewsDto {
+    suspend fun searchNews(query: String, page: Int = 1, pageSize: Int = 50): NewsDto {
         return httpClient.get("everything") {
             parameter("q", query)
+            parameter("page", page)
+            parameter("pageSize", pageSize)
             parameter("apiKey", BuildConfig.API_KEY)
         }.body<NewsDto>()
     }

@@ -55,9 +55,9 @@ class NewsRepositoryImpl(
         }
     }
 
-    override suspend fun searchNews(query: String): Result<List<Article>> {
+    override suspend fun searchNews(query: String, page:Int, pageSize: Int): Result<List<Article>> {
         return try {
-            val searchNewsResponse = newsApiServices.searchNews(query)
+            val searchNewsResponse = newsApiServices.searchNews(query,page,pageSize)
             Log.d("NewsRepositoryImpl", "searchNews: ${searchNewsResponse.articles}")
             Result.Success(searchNewsResponse.articles)
         } catch (e: Exception) {
