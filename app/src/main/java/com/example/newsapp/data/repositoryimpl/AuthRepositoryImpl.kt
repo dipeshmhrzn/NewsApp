@@ -60,5 +60,8 @@ class AuthRepositoryImpl(
         }
     }
 
+    override fun getCurrentUserId(): String? {
+        return firebaseAuth.currentUser?.uid
+    }
 
 }

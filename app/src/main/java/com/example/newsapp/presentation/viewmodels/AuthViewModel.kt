@@ -11,11 +11,14 @@ import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.credentials.exceptions.NoCredentialException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.newsapp.domain.model.UserProfile
 import com.example.newsapp.domain.usecase.authdatastoreusecase.SetAuthDatastoreUseCase
+import com.example.newsapp.domain.usecase.authusecase.GetCurrentUserIdUseCase
 import com.example.newsapp.domain.usecase.authusecase.GoogleSignInUseCase
 import com.example.newsapp.domain.usecase.authusecase.LoginUseCase
 import com.example.newsapp.domain.usecase.authusecase.SignOutUseCase
 import com.example.newsapp.domain.usecase.authusecase.SignupUseCase
+import com.example.newsapp.domain.usecase.profileusecase.ProfileUseCase
 import com.example.newsapp.domain.util.Result
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.Companion.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
@@ -27,6 +30,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.toString
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
@@ -36,7 +40,9 @@ class AuthViewModel @Inject constructor(
     private val googleSignInUseCase: GoogleSignInUseCase,
     private val setAuthDatastoreUseCase: SetAuthDatastoreUseCase,
     private val credentialManager: CredentialManager,
-    private val getCredentialRequest: GetCredentialRequest
+    private val getCredentialRequest: GetCredentialRequest,
+    private val getCurrentUserIdUseCase: GetCurrentUserIdUseCase,
+    private val userProfileUseCase: ProfileUseCase
 ) : ViewModel() {
 
     private val _authState = MutableStateFlow<Result<String>>(Result.Idle)
@@ -55,13 +61,20 @@ class AuthViewModel @Inject constructor(
             val result = signupUseCase(email, password)
             Log.d("AuthViewModel", "signUp: $result")
             _authState.value = result
+            if (result is Result.Success) {
+                val userProfile = UserProfile(
+                    userId = getCurrentUserIdUseCase(),
+                    emailAddress = email
+                )
+                userProfileUseCase.saveUserProfile(userProfile)
+            }
         }
     }
 
     fun login(email: String, password: String) {
         viewModelScope.launch(Dispatchers.IO) {
             _authState.value = Result.Loading
-            delay(300)
+            delay(400)
             val result = loginUseCase(email, password)
             if (result is Result.Success) {
                 setAuthDatastoreUseCase.setLoggedIn(true)
@@ -83,6 +96,25 @@ class AuthViewModel @Inject constructor(
                     if (result is Result.Success){
                         setAuthDatastoreUseCase.setLoggedIn(true)
                         setAuthDatastoreUseCase.setFirstTimeLogin(false)
+
+                        val firebaseUser = result.data
+
+                        val existingProfile = userProfileUseCase.getUserProfile(firebaseUser.uid)
+
+                        if (existingProfile is Result.Success && existingProfile.data != null) {
+
+                            // User profile exists - don't overwrite anything
+
+                        } else {
+                            // First time sign in - create new profile
+                            val userProfile = UserProfile(
+                                userId = firebaseUser.uid,
+                                emailAddress = firebaseUser.email ?: "",
+                                profilePicture = firebaseUser.photoUrl?.toString() ?: ""
+                            )
+                            userProfileUseCase.saveUserProfile(userProfile)
+                        }
+
                     }
                 }
             }catch (e: GetCredentialCancellationException){

@@ -104,7 +104,7 @@ fun CustomButton(
 
             if (buttonState == ButtonState.SUCCESS) {
                 LaunchedEffect(Unit) {
-                    delay(500)
+                    delay(800)
                     onSuccessAnimationFinished?.invoke()
                 }
 

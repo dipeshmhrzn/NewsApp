@@ -1,6 +1,5 @@
 package com.example.newsapp.presentation.mainscreen
 
-import android.content.Intent
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -31,6 +30,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.newsapp.data.dto.topheadlines.Article
+import com.example.newsapp.domain.util.Result
 import com.example.newsapp.navigation.Routes
 import com.example.newsapp.presentation.mainscreen.components.BottomBar
 import com.example.newsapp.presentation.mainscreen.components.MenuItems
@@ -38,17 +38,18 @@ import com.example.newsapp.presentation.mainscreen.components.TopAppBar
 import com.example.newsapp.presentation.mainscreen.followingscreen.FollowingScreen
 import com.example.newsapp.presentation.mainscreen.homescreen.HomeScreen
 import com.example.newsapp.presentation.mainscreen.sourcescreen.SourceScreen
-import com.example.newsapp.presentation.utils.findActivity
 import com.example.newsapp.presentation.utils.openWebsite
 import com.example.newsapp.presentation.utils.shareUrlIntent
 import com.example.newsapp.presentation.viewmodels.BookmarkViewModel
 import com.example.newsapp.presentation.viewmodels.NewsViewModel
+import com.example.newsapp.presentation.viewmodels.UserProfileViewModel
 
 @Composable
 fun MainScreen(
     navHostController: NavHostController,
     newsViewModel: NewsViewModel,
-    bookmarkViewModel: BookmarkViewModel = hiltViewModel()
+    bookmarkViewModel: BookmarkViewModel = hiltViewModel(),
+    userProfileViewModel: UserProfileViewModel = hiltViewModel()
 ) {
 
     val innerNavController = rememberNavController()
@@ -76,6 +77,14 @@ fun MainScreen(
 
     val bookmarkState by bookmarkViewModel.uiState.collectAsState()
 
+    val userProfileState by userProfileViewModel.userProfile.collectAsState()
+    val profilePicture = (userProfileState as? Result.Success)
+        ?.data
+        ?.profilePicture
+        ?.takeIf { it.isNotBlank() }
+    val isLoading = userProfileState is Result.Loading
+
+
     LaunchedEffect(bookmarkState.message) {
         bookmarkState.message?.let { msg ->
             Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
@@ -95,7 +104,9 @@ fun MainScreen(
                     },
                     onProfileClick = {
                         navHostController.navigate(Routes.ProfileScreen)
-                    }
+                    },
+                    isLoading = isLoading,
+                    profilePicture = profilePicture
                 )
             },
             bottomBar = {
@@ -218,11 +229,11 @@ fun MainScreen(
         if (isMenuVisible) {
             MenuItems(
                 article = selectedArticle!!,
-                isBookmarked= bookmarkState.bookmarks.any { it.url == selectedArticle!!.url },
+                isBookmarked = bookmarkState.bookmarks.any { it.url == selectedArticle!!.url },
                 onDismiss = {
                     isMenuVisible = false
                 },
-                onSaveClick = {article ->
+                onSaveClick = { article ->
                     bookmarkViewModel.toggleBookmark(article)
                 },
                 onShareClick = { article ->

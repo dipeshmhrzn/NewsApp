@@ -112,8 +112,7 @@ fun Navigation() {
             }
         ) {
             LoginScreen(
-                navHostController = navController,
-                authDataStoreViewModel = authDataStoreViewModel
+                navHostController = navController
             )
 
         }

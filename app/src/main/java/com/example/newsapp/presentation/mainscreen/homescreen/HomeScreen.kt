@@ -63,7 +63,7 @@ fun HomeScreen(
     onSeeAll: () -> Unit,
     onMenuClick: (item: Article) -> Unit,
     viewModel: NewsViewModel,
-    bookmarkViewModel: BookmarkViewModel = hiltViewModel()
+    bookmarkViewModel: BookmarkViewModel = hiltViewModel(),
 ) {
 
     val context = LocalContext.current

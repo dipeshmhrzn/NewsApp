@@ -15,13 +15,16 @@ import com.example.newsapp.data.repositoryimpl.AuthRepositoryImpl
 import com.example.newsapp.data.repositoryimpl.BookmarkRepositoryImpl
 import com.example.newsapp.data.repositoryimpl.FollowRepositoryImpl
 import com.example.newsapp.data.repositoryimpl.NewsRepositoryImpl
+import com.example.newsapp.data.repositoryimpl.UserProfileRepositoryImpl
 import com.example.newsapp.domain.repository.AuthDataStoreRepository
 import com.example.newsapp.domain.repository.AuthRepository
 import com.example.newsapp.domain.repository.BookmarkRepository
 import com.example.newsapp.domain.repository.FollowRepository
 import com.example.newsapp.domain.repository.NewsRepository
+import com.example.newsapp.domain.repository.UserProfileRepository
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -165,5 +168,14 @@ object DataModule {
             .build()
     }
 
+    @Provides
+    @Singleton
+    fun provideFirebaseFirestore(): FirebaseFirestore = FirebaseFirestore.getInstance()
+
+    @Provides
+    @Singleton
+    fun provideUserProfileRepository(firebaseFireStore: FirebaseFirestore): UserProfileRepository{
+        return UserProfileRepositoryImpl(firebaseFireStore)
+    }
 
 }

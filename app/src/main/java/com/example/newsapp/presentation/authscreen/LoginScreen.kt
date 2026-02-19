@@ -45,7 +45,6 @@ import com.google.firebase.auth.FirebaseUser
 fun LoginScreen(
     navHostController: NavHostController,
     authViewModel: AuthViewModel = hiltViewModel(),
-    authDataStoreViewModel: AuthDataStoreViewModel
 ) {
 
     val focusManager = LocalFocusManager.current
