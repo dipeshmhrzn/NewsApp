@@ -1,7 +1,10 @@
 package com.example.newsapp.di
 
 import android.content.Context
+import androidx.credentials.CredentialManager
+import androidx.credentials.GetCredentialRequest
 import androidx.room.Room
+import com.example.newsapp.R
 import com.example.newsapp.data.local.dao.BookmarkDao
 import com.example.newsapp.data.local.database.NewsDatabase
 import com.example.newsapp.data.local.datastore.AuthDataStore
@@ -17,6 +20,7 @@ import com.example.newsapp.domain.repository.AuthRepository
 import com.example.newsapp.domain.repository.BookmarkRepository
 import com.example.newsapp.domain.repository.FollowRepository
 import com.example.newsapp.domain.repository.NewsRepository
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.firebase.auth.FirebaseAuth
 import dagger.Module
 import dagger.Provides
@@ -132,5 +136,34 @@ object DataModule {
     fun provideBookmarkRepository(bookmarkDao: BookmarkDao): BookmarkRepository{
         return BookmarkRepositoryImpl(bookmarkDao)
     }
+
+    @Provides
+    @Singleton
+    fun provideCredentialManager(@ApplicationContext context: Context): CredentialManager{
+        return CredentialManager.create(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideGoogleIdOptions(
+        @ApplicationContext context: Context
+    ): GetGoogleIdOption{
+        return GetGoogleIdOption.Builder()
+            .setServerClientId(context.getString(R.string.web_client_id))
+            .setAutoSelectEnabled(false)
+            .setFilterByAuthorizedAccounts(false)
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideCredentialRequest(
+        getGoogleIdOption: GetGoogleIdOption
+    ): GetCredentialRequest{
+        return GetCredentialRequest.Builder()
+            .addCredentialOption(getGoogleIdOption)
+            .build()
+    }
+
 
 }

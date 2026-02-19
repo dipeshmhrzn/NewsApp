@@ -1,5 +1,6 @@
 package com.example.newsapp.presentation.authscreen
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -38,6 +39,7 @@ import com.example.newsapp.presentation.viewmodels.AuthDataStoreViewModel
 import com.example.newsapp.presentation.viewmodels.AuthViewModel
 import com.example.newsapp.ui.theme.InterDisplay
 import com.example.newsapp.ui.theme.PlayFairDisplay
+import com.google.firebase.auth.FirebaseUser
 
 @Composable
 fun LoginScreen(
@@ -57,6 +59,8 @@ fun LoginScreen(
 
     val context = LocalContext.current
     val authState by authViewModel.authState.collectAsState()
+    val googleAuthState by authViewModel.googleAuthState.collectAsState()
+    val openAddGoogleAccountEvent by authViewModel.openAddGoogleAccountEvent.collectAsState()
 
     val buttonState = when (authState) {
         is Result.Loading -> ButtonState.LOADING
@@ -66,6 +70,14 @@ fun LoginScreen(
 
     LaunchedEffect(Unit) {
         authViewModel.resetAuthState()
+    }
+
+    LaunchedEffect(openAddGoogleAccountEvent) {
+        if (openAddGoogleAccountEvent) {
+            val intent = authViewModel.getAddGoogleAccountIntent()
+            context.startActivity(intent)
+            authViewModel.resetAddGoogleAccountEvent()
+        }
     }
 
     LaunchedEffect(authState) {
@@ -100,6 +112,34 @@ fun LoginScreen(
             Result.Idle, Result.Loading ,is Result.Success-> {
                 emailError = null
                 passwordError = null
+            }
+        }
+    }
+
+    LaunchedEffect(googleAuthState) {
+        when (googleAuthState) {
+            is Result.Success -> {
+                val firebaseUser = (googleAuthState as Result.Success<FirebaseUser>).data
+                Toast.makeText(context, "Google Sign-In Successful", Toast.LENGTH_SHORT).show()
+
+                navHostController.navigate(Routes.MainScreen) {
+                    popUpTo(Routes.LoginScreen) {
+                        inclusive = true
+                    }
+                    authViewModel.resetAuthState()
+                }
+            }
+
+            is Result.Error -> {
+                val errorMessage = (googleAuthState as Result.Error).message
+                Toast.makeText(context, "Error: $errorMessage", Toast.LENGTH_SHORT).show()
+            }
+
+            Result.Loading -> {
+                Toast.makeText(context, "Signing in with Google...", Toast.LENGTH_SHORT).show()
+            }
+
+            Result.Idle -> {
             }
         }
     }
@@ -198,7 +238,9 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             SocialSignInOptions(
-                onGoogleSignIn = {}
+                onGoogleSignIn = {
+                    authViewModel.signInWithGoogle(context)
+                }
             )
 
             Spacer(modifier = Modifier.height(16.dp))

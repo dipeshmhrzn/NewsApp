@@ -132,12 +132,7 @@ fun ProfileScreen(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(10.dp))
-                Text(
-                    text = "Hi Dipesh!",
-                    fontFamily = InterDisplay,
-                    fontSize = 18.sp,
-                )
+                Spacer(modifier = Modifier.height(5.dp))
 
                 Box(
                     modifier = Modifier
