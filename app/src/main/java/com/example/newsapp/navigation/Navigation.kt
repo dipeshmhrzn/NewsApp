@@ -13,6 +13,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.newsapp.domain.util.Result
+import com.example.newsapp.presentation.authscreen.ForgotPasswordScreen
 import com.example.newsapp.presentation.profilescreen.ProfileScreen
 import com.example.newsapp.presentation.searchscreen.SearchScreen
 import com.example.newsapp.presentation.mainscreen.sourcescreen.SourcesDetailScreen
@@ -137,6 +138,31 @@ fun Navigation() {
             }
         ) {
             SignUpScreen(navHostController = navController)
+
+        }
+
+        composable<Routes.ForgotPasswordScreen>(
+            enterTransition = {
+                fadeIn(
+                    animationSpec = tween(
+                        durationMillis = 500,
+                        easing = LinearEasing
+                    )
+                )
+            },
+            popExitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { it },
+                    animationSpec = tween(
+                        durationMillis = 500,
+                        easing = FastOutSlowInEasing
+                    )
+                )
+            }
+        ) {
+            ForgotPasswordScreen(
+                navHostController = navController
+            )
 
         }
 

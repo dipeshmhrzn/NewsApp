@@ -198,7 +198,9 @@ fun ProfileScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clip(shape = RoundedCornerShape(8.dp))
-                                    .clickable {}
+                                    .clickable {
+                                        navHostController.navigate(Routes.ForgotPasswordScreen)
+                                    }
                                     .padding(8.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(16.dp)

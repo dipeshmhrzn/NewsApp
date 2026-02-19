@@ -44,4 +44,7 @@ sealed class Routes {
     @Serializable
     data object BookmarkScreen : Routes()
 
+    @Serializable
+    data object ForgotPasswordScreen : Routes()
+
 }

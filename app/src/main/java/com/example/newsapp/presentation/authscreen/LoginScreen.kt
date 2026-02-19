@@ -108,7 +108,7 @@ fun LoginScreen(
 
             }
 
-            Result.Idle, Result.Loading ,is Result.Success-> {
+            Result.Idle, Result.Loading, is Result.Success -> {
                 emailError = null
                 passwordError = null
             }
@@ -204,7 +204,9 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(6.dp))
 
-            TextButton(onClick = {}) {
+            TextButton(onClick = {
+                navHostController.navigate(Routes.ForgotPasswordScreen)
+            }) {
                 Text(
                     text = "Forgot the password ?",
                     modifier = Modifier.fillMaxWidth(),
@@ -229,7 +231,7 @@ fun LoginScreen(
                         popUpTo(Routes.LoginScreen) {
                             inclusive = true
                         }
-                        launchSingleTop=true
+                        launchSingleTop = true
                     }
                 }
             )

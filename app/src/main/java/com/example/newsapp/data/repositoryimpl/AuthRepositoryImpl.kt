@@ -51,6 +51,15 @@ class AuthRepositoryImpl(
         }
     }
 
+    override suspend fun resetPassword(email: String): Result<String> {
+        return try {
+            firebaseAuth.sendPasswordResetEmail(email).await()
+            Result.Success("Password reset email sent")
+        }catch (e: Exception){
+            Result.Error(e.localizedMessage ?: "Error occurred")
+        }
+    }
+
     override suspend fun signOut(): Result<String> {
         return try {
             firebaseAuth.signOut()

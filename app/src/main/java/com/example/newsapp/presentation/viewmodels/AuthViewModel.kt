@@ -16,6 +16,7 @@ import com.example.newsapp.domain.usecase.authdatastoreusecase.SetAuthDatastoreU
 import com.example.newsapp.domain.usecase.authusecase.GetCurrentUserIdUseCase
 import com.example.newsapp.domain.usecase.authusecase.GoogleSignInUseCase
 import com.example.newsapp.domain.usecase.authusecase.LoginUseCase
+import com.example.newsapp.domain.usecase.authusecase.ResetPasswordUseCase
 import com.example.newsapp.domain.usecase.authusecase.SignOutUseCase
 import com.example.newsapp.domain.usecase.authusecase.SignupUseCase
 import com.example.newsapp.domain.usecase.profileusecase.ProfileUseCase
@@ -37,6 +38,7 @@ class AuthViewModel @Inject constructor(
     private val loginUseCase: LoginUseCase,
     private val signupUseCase: SignupUseCase,
     private val signOutUseCase: SignOutUseCase,
+    private val resetPasswordUseCase: ResetPasswordUseCase,
     private val googleSignInUseCase: GoogleSignInUseCase,
     private val setAuthDatastoreUseCase: SetAuthDatastoreUseCase,
     private val credentialManager: CredentialManager,
@@ -84,6 +86,15 @@ class AuthViewModel @Inject constructor(
         }
     }
 
+    fun resetPassword(email: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _authState.value = Result.Loading
+            delay(400)
+            val result = resetPasswordUseCase(email)
+            _authState.value = result
+        }
+    }
+
     fun signInWithGoogle(context: Context) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
@@ -126,6 +137,7 @@ class AuthViewModel @Inject constructor(
             }
         }
     }
+
 
     fun signOut() {
         viewModelScope.launch(Dispatchers.IO) {
