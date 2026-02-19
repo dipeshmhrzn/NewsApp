@@ -205,7 +205,7 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(6.dp))
 
             TextButton(onClick = {
-                navHostController.navigate(Routes.ForgotPasswordScreen)
+                navHostController.navigate(Routes.ForgotPasswordScreen(email = null))
             }) {
                 Text(
                     text = "Forgot the password ?",

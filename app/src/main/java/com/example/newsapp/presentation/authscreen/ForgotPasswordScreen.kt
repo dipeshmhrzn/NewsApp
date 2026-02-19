@@ -1,5 +1,6 @@
 package com.example.newsapp.presentation.authscreen
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
@@ -44,6 +46,7 @@ import com.example.newsapp.ui.theme.PlayFairDisplay
 
 @Composable
 fun ForgotPasswordScreen(
+    prefilledEmail: String?,
     navHostController: NavHostController,
     authViewModel: AuthViewModel = hiltViewModel()
 ) {
@@ -51,6 +54,8 @@ fun ForgotPasswordScreen(
     val focusManager = LocalFocusManager.current
 
     var email by remember { mutableStateOf("") }
+
+    val context = LocalContext.current
 
     val authState by authViewModel.authState.collectAsState()
 
@@ -61,7 +66,6 @@ fun ForgotPasswordScreen(
         is Result.Success -> ButtonState.SUCCESS
         else -> ButtonState.IDLE
     }
-
 
     LaunchedEffect(authState) {
         when (authState) {
@@ -81,7 +85,7 @@ fun ForgotPasswordScreen(
                         null
                     }
                 }
-                }
+            }
 
             Result.Idle, Result.Loading, is Result.Success -> {
                 emailError = null
@@ -138,15 +142,18 @@ fun ForgotPasswordScreen(
             )
 
             OutlinedTextField(
-                value = email,
+                value = prefilledEmail ?: email,
                 onValueChange = {
-                    email = it
-                    emailError=null
+                    if (prefilledEmail == null) {
+                        email = it
+                        emailError = null
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth(),
                 singleLine = true,
                 isError = emailError != null,
+                enabled = prefilledEmail == null,
                 supportingText = emailError?.let {
                     {
                         Text(
@@ -160,13 +167,24 @@ fun ForgotPasswordScreen(
                     }
                 },
                 trailingIcon = {
-                    if (emailError != null) {
-                        Icon(
-                            imageVector = Icons.Default.Warning,
-                            contentDescription = null,
-                            tint = Color.Red,
-                            modifier = Modifier.size(20.dp)
-                        )
+                    when {
+                        emailError != null -> {
+                            Icon(
+                                imageVector = Icons.Default.Warning,
+                                contentDescription = "Error",
+                                tint = Color.Red,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+
+                        prefilledEmail != null -> {
+                            Icon(
+                                imageVector = Icons.Default.Lock,
+                                contentDescription = "Read-only",
+                                tint = Color.Gray,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
                     }
                 },
                 shape = RoundedCornerShape(10.dp),
@@ -186,15 +204,22 @@ fun ForgotPasswordScreen(
             CustomButton(
                 onButtonClick = {
                     focusManager.clearFocus()
-                    authViewModel.resetPassword(email)
+                    val emailToSend = prefilledEmail ?: email
+                    authViewModel.resetPassword(emailToSend)
                 },
                 buttonText = "Send Link",
                 buttonState = buttonState,
                 onSuccessAnimationFinished = {
                     navHostController.popBackStack()
+                    Toast.makeText(
+                        context,
+                        "Password reset link sent to your email",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             )
         }
 
 
-    }}
+    }
+}

@@ -159,9 +159,11 @@ fun Navigation() {
                     )
                 )
             }
-        ) {
+        ) {backStackEntry ->
+            val email = backStackEntry.arguments?.getString("email")
             ForgotPasswordScreen(
-                navHostController = navController
+                navHostController = navController,
+                prefilledEmail = email
             )
 
         }

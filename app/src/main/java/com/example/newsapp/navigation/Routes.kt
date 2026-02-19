@@ -45,6 +45,6 @@ sealed class Routes {
     data object BookmarkScreen : Routes()
 
     @Serializable
-    data object ForgotPasswordScreen : Routes()
+    data class ForgotPasswordScreen(val email: String? = null) : Routes()
 
 }
