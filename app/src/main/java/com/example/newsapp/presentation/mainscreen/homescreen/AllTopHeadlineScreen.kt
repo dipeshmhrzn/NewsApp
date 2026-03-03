@@ -1,6 +1,7 @@
 package com.example.newsapp.presentation.mainscreen.homescreen
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -66,9 +67,7 @@ fun AllTopHeadlineScreen(
 
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val context = LocalContext.current
-    val shareLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { }
+
 
     var isMenuVisible by remember { mutableStateOf(false) }
     var selectedArticle by remember { mutableStateOf<Article?>(null) }
@@ -204,7 +203,9 @@ fun AllTopHeadlineScreen(
                     bookmarkViewModel.toggleBookmark(article)
                 },
                 onShareClick = { article ->
-                    shareLauncher.launch(shareUrlIntent(article.url))
+                    val intent = shareUrlIntent(article.url)
+                    val chooser = Intent.createChooser(intent, "Share via")
+                    context.startActivity(chooser)
                 },
                 onRedirectClick = { article ->
                     openWebsite(context, article.url)

@@ -1,8 +1,7 @@
 package com.example.newsapp.presentation.mainscreen
 
+import android.content.Intent
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
@@ -61,10 +60,6 @@ fun MainScreen(
     var isMenuVisible by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
-
-    val shareLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { }
 
     var selectedArticle by remember { mutableStateOf<Article?>(null) }
 
@@ -244,7 +239,9 @@ fun MainScreen(
                     bookmarkViewModel.toggleBookmark(article)
                 },
                 onShareClick = { article ->
-                    shareLauncher.launch(shareUrlIntent(article.url))
+                    val intent = shareUrlIntent(article.url)
+                    val chooser = Intent.createChooser(intent, "Share via")
+                    context.startActivity(chooser)
                 },
                 onRedirectClick = { article ->
                     openWebsite(context, article.url)

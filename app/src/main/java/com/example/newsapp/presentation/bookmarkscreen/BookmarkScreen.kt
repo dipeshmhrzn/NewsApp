@@ -1,9 +1,7 @@
 package com.example.newsapp.presentation.bookmarkscreen
 
+import android.content.Intent
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -11,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -56,10 +53,6 @@ fun BookmarkScreen(
 ) {
     val context = LocalContext.current
     val bookmarkState by bookmarkViewModel.uiState.collectAsState()
-
-    val shareLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { }
 
     LaunchedEffect(bookmarkState.message) {
         bookmarkState.message?.let { msg ->
@@ -164,7 +157,9 @@ fun BookmarkScreen(
                                         openWebsite(context, article.url)
                                     },
                                     onShareClick = {
-                                        shareLauncher.launch(shareUrlIntent(article.url))
+                                        val intent = shareUrlIntent(article.url)
+                                        val chooser = Intent.createChooser(intent,"Share via")
+                                        context.startActivity(chooser)
                                     },
                                     onBookmarkClick = {
                                         bookmarkViewModel.toggleBookmark(article)

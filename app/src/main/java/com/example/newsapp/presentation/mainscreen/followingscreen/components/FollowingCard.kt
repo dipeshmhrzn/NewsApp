@@ -26,7 +26,6 @@ import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,12 +35,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.newsapp.data.dto.topheadlines.Article
 import com.example.newsapp.presentation.mainscreen.homescreen.components.NewsCard
-import com.example.newsapp.presentation.utils.findActivity
 import com.example.newsapp.presentation.utils.openWebsite
 import com.example.newsapp.presentation.utils.shareUrlIntent
 import com.example.newsapp.presentation.viewmodels.BookmarkUiState
 import com.example.newsapp.ui.theme.InterDisplay
-import kotlin.Unit
 
 @Composable
 fun FollowingCard(
@@ -55,10 +52,6 @@ fun FollowingCard(
     if (articles.isEmpty()) return
 
     val context = LocalContext.current
-
-    val shareLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { }
 
     Box(
         modifier = Modifier
@@ -124,7 +117,9 @@ fun FollowingCard(
                     sourceName = article.author ?: "",
                     publishedAt = article.publishedAt,
                     onShareClick = {
-                        shareLauncher.launch(shareUrlIntent(article.url))
+                        val intent = shareUrlIntent(article.url)
+                        val chooser = Intent.createChooser(intent, "Share via")
+                        context.startActivity(chooser)
                     },
                     onBookmarkClick = {
                         onBookmarkClick(article)

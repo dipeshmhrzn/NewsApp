@@ -1,6 +1,7 @@
 package com.example.newsapp.presentation.mainscreen.sourcescreen
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -69,10 +70,6 @@ fun SourcesDetailScreen(
 ) {
     val context = LocalContext.current
     val listState = rememberLazyListState()
-
-    val shareLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { }
 
     val followedSourceIds by followViewModel
         .followedSourceIds
@@ -241,7 +238,9 @@ fun SourcesDetailScreen(
                     bookmarkViewModel.toggleBookmark(article)
                 },
                 onShareClick = { article ->
-                    shareLauncher.launch(shareUrlIntent(article.url))
+                    val intent = shareUrlIntent(article.url)
+                    val chooser = Intent.createChooser(intent, "Share via")
+                    context.startActivity(chooser)
                 },
                 onRedirectClick = { article ->
                     openWebsite(context, article.url)

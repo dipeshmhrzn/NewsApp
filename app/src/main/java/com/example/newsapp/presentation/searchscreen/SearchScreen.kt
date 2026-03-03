@@ -1,6 +1,7 @@
 package com.example.newsapp.presentation.searchscreen
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -71,10 +72,6 @@ fun SearchScreen(
     val focusRequester = remember { FocusRequester() }
 
     val context = LocalContext.current
-
-    val shareLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { }
 
     val bookmarkState by bookmarkViewModel.uiState.collectAsState()
 
@@ -211,8 +208,9 @@ fun SearchScreen(
                                         openWebsite(context, article.url)
                                     },
                                     onShareClick = {
-                                        shareLauncher.launch(shareUrlIntent(article.url))
-                                    },
+                                        val intent = shareUrlIntent(article.url)
+                                        val chooser = Intent.createChooser(intent, "Share via")
+                                        context.startActivity(chooser)                                    },
                                     onBookmarkClick = {
                                         bookmarkViewModel.toggleBookmark(article)
                                     },

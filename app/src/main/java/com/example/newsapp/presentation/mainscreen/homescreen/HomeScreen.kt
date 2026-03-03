@@ -1,6 +1,7 @@
 package com.example.newsapp.presentation.mainscreen.homescreen
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -67,9 +68,6 @@ fun HomeScreen(
 ) {
 
     val context = LocalContext.current
-    val shareLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { }
 
     val newsState by viewModel.newsState.collectAsState()
     val bookmarkState by bookmarkViewModel.uiState.collectAsState()
@@ -271,7 +269,9 @@ fun HomeScreen(
                                 openWebsite(context, item.url)
                             },
                             onShareClick = {
-                                shareLauncher.launch(shareUrlIntent(item.url))
+                                val intent = shareUrlIntent(item.url)
+                                val chooser = Intent.createChooser(intent, "Share via")
+                                context.startActivity(chooser)
                             },
                             onBookmarkClick = {
                                 bookmarkViewModel.toggleBookmark(item)
