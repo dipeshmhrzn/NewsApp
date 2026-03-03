@@ -1,12 +1,15 @@
 package com.example.newsapp.presentation.authscreen
 
 import android.widget.Toast
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -17,6 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -35,6 +39,8 @@ import com.example.newsapp.presentation.authscreen.components.CustomBottomText
 import com.example.newsapp.presentation.authscreen.components.CustomButton
 import com.example.newsapp.presentation.authscreen.components.EmailPasswordField
 import com.example.newsapp.presentation.authscreen.components.SocialSignInOptions
+import com.example.newsapp.presentation.mainscreen.homescreen.components.ShimmeredHomeScreen
+import com.example.newsapp.presentation.mainscreen.homescreen.components.ShimmeredTopHeadlineCard
 import com.example.newsapp.presentation.viewmodels.AuthDataStoreViewModel
 import com.example.newsapp.presentation.viewmodels.AuthViewModel
 import com.example.newsapp.presentation.viewmodels.UserProfileViewModel
@@ -70,6 +76,8 @@ fun LoginScreen(
         is Result.Success -> ButtonState.SUCCESS
         else -> ButtonState.IDLE
     }
+
+    var isUserDataLoading by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         authViewModel.resetAuthState()
@@ -122,6 +130,7 @@ fun LoginScreen(
     LaunchedEffect(googleAuthState) {
         when (googleAuthState) {
             is Result.Success -> {
+                isUserDataLoading = true
                 Toast.makeText(context, "Google Sign-In Successful", Toast.LENGTH_SHORT).show()
             }
 
@@ -148,121 +157,122 @@ fun LoginScreen(
         }
     }
 
-    Scaffold(
-        containerColor = Color(0xFFFFFFFF)
-    ) { innerPadding ->
+    if (isUserDataLoading) {
+        ShimmeredHomeScreen(true)
+    } else {
+        Scaffold(
+            containerColor = Color(0xFFFFFFFF)
+        ) { innerPadding ->
 
-        Column(
-            modifier = Modifier
-                .padding(innerPadding)
-                .padding(16.dp)
-                .fillMaxSize()
-        ) {
+            Column(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .padding(16.dp)
+                    .fillMaxSize()
+            ) {
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-            Text(
-                text = "Hello",
-                fontSize = 50.sp,
-                fontFamily = PlayFairDisplay,
-                fontWeight = FontWeight.Bold,
-            )
-            Text(
-                text = "Again!",
-                fontSize = 50.sp,
-                fontFamily = PlayFairDisplay,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF0295F6)
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = "Welcome back you’ve\nbeen missed",
-                fontSize = 24.sp,
-                fontFamily = InterDisplay,
-                fontWeight = FontWeight.Normal,
-                lineHeight = 30.sp,
-                color = Color(0xFF4E4B66)
-            )
-
-            Spacer(modifier = Modifier.height(28.dp))
-
-            EmailPasswordField(
-                email = email,
-                onEmailChange = {
-                    email = it
-                    emailError = null
-                },
-                password = password,
-                onPasswordChange = {
-                    password = it
-                    passwordError = null
-                },
-                passwordVisible = passwordVisible,
-                onPasswordVisibilityChange = { passwordVisible = !passwordVisible },
-                isEmailError = emailError != null,
-                isPasswordError = passwordError != null,
-                emailSupportingText = emailError,
-                passwordSupportingText = passwordError
-            )
-
-            Spacer(modifier = Modifier.height(6.dp))
-
-            TextButton(onClick = {
-                navHostController.navigate(Routes.ForgotPasswordScreen(email = null))
-            }) {
                 Text(
-                    text = "Forgot the password ?",
-                    modifier = Modifier.fillMaxWidth(),
-                    fontSize = 16.sp,
+                    text = "Hello",
+                    fontSize = 50.sp,
+                    fontFamily = PlayFairDisplay,
+                    fontWeight = FontWeight.Bold,
+                )
+                Text(
+                    text = "Again!",
+                    fontSize = 50.sp,
+                    fontFamily = PlayFairDisplay,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF0295F6)
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = "Welcome back you’ve\nbeen missed",
+                    fontSize = 24.sp,
                     fontFamily = InterDisplay,
                     fontWeight = FontWeight.Normal,
                     lineHeight = 30.sp,
-                    color = Color(0xFF0295F6),
-                    textAlign = TextAlign.End
+                    color = Color(0xFF4E4B66)
+                )
+
+                Spacer(modifier = Modifier.height(28.dp))
+
+                EmailPasswordField(
+                    email = email,
+                    onEmailChange = {
+                        email = it
+                        emailError = null
+                    },
+                    password = password,
+                    onPasswordChange = {
+                        password = it
+                        passwordError = null
+                    },
+                    passwordVisible = passwordVisible,
+                    onPasswordVisibilityChange = { passwordVisible = !passwordVisible },
+                    isEmailError = emailError != null,
+                    isPasswordError = passwordError != null,
+                    emailSupportingText = emailError,
+                    passwordSupportingText = passwordError
+                )
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                TextButton(onClick = {
+                    navHostController.navigate(Routes.ForgotPasswordScreen(email = null))
+                }) {
+                    Text(
+                        text = "Forgot the password ?",
+                        modifier = Modifier.fillMaxWidth(),
+                        fontSize = 16.sp,
+                        fontFamily = InterDisplay,
+                        fontWeight = FontWeight.Normal,
+                        lineHeight = 30.sp,
+                        color = Color(0xFF0295F6),
+                        textAlign = TextAlign.End
+                    )
+                }
+
+                CustomButton(
+                    onButtonClick = {
+                        focusManager.clearFocus()
+                        authViewModel.login(email, password)
+                    },
+                    buttonText = "Login",
+                    buttonState = buttonState,
+                    onSuccessAnimationFinished = {
+                        navHostController.navigate(Routes.MainScreen) {
+                            popUpTo(Routes.LoginScreen) {
+                                inclusive = true
+                            }
+                            launchSingleTop = true
+                        }
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                SocialSignInOptions(
+                    onGoogleSignIn = {
+                        authViewModel.signInWithGoogle(context) {
+                            userProfileViewModel.getUserProfile()
+                        }
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                CustomBottomText(
+                    text1 = "Don’t have an account? ",
+                    text2 = "Sign Up",
+                    onTextClick = {
+                        navHostController.navigate(Routes.SignUpScreen)
+                    }
                 )
             }
-
-            CustomButton(
-                onButtonClick = {
-                    focusManager.clearFocus()
-                    authViewModel.login(email, password)
-                },
-                buttonText = "Login",
-                buttonState = buttonState,
-                onSuccessAnimationFinished = {
-                    navHostController.navigate(Routes.MainScreen) {
-                        popUpTo(Routes.LoginScreen) {
-                            inclusive = true
-                        }
-                        launchSingleTop = true
-                    }
-                }
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            SocialSignInOptions(
-                onGoogleSignIn = {
-                    authViewModel.signInWithGoogle(context) {
-                        userProfileViewModel.getUserProfile()
-                    }
-                }
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            CustomBottomText(
-                text1 = "Don’t have an account? ",
-                text2 = "Sign Up",
-                onTextClick = {
-                    navHostController.navigate(Routes.SignUpScreen)
-                }
-            )
-
         }
-
-
     }
 }

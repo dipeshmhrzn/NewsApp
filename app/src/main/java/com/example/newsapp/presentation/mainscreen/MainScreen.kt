@@ -80,9 +80,9 @@ fun MainScreen(
         ?.takeIf { it.isNotBlank() }
     val isLoading = userProfileState is Result.Loading
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(FirebaseAuth.getInstance().currentUser) {
         val currentUser = FirebaseAuth.getInstance().currentUser
-        if (currentUser != null) {
+        if (currentUser != null && userProfileState !is Result.Success) {
             userProfileViewModel.getUserProfile()
         }
     }

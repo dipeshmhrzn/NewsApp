@@ -32,6 +32,7 @@ import com.example.newsapp.presentation.authscreen.components.CustomBottomText
 import com.example.newsapp.presentation.authscreen.components.CustomButton
 import com.example.newsapp.presentation.authscreen.components.EmailPasswordField
 import com.example.newsapp.presentation.authscreen.components.SocialSignInOptions
+import com.example.newsapp.presentation.mainscreen.homescreen.components.ShimmeredHomeScreen
 import com.example.newsapp.presentation.viewmodels.AuthViewModel
 import com.example.newsapp.presentation.viewmodels.UserProfileViewModel
 import com.example.newsapp.ui.theme.InterDisplay
@@ -66,6 +67,8 @@ fun SignUpScreen(
         else -> ButtonState.IDLE
     }
 
+    var isUserDataLoading by remember { mutableStateOf(false) }
+
     LaunchedEffect(Unit) {
         authViewModel.resetAuthState()
     }
@@ -81,6 +84,7 @@ fun SignUpScreen(
     LaunchedEffect(googleAuthState) {
         when (googleAuthState) {
             is Result.Success -> {
+                isUserDataLoading = true
                 Toast.makeText(context, "Google Sign-In Successful", Toast.LENGTH_SHORT).show()
             }
 
@@ -128,7 +132,7 @@ fun SignUpScreen(
 
             }
 
-            Result.Idle, Result.Loading ,is Result.Success-> {
+            Result.Idle, Result.Loading, is Result.Success -> {
                 emailError = null
                 passwordError = null
             }
@@ -139,110 +143,112 @@ fun SignUpScreen(
     LaunchedEffect(userProfileState) {
         if (userProfileState is Result.Success && FirebaseAuth.getInstance().currentUser != null) {
             navHostController.navigate(Routes.MainScreen) {
-                popUpTo(Routes.LoginScreen) { inclusive = true }
+                popUpTo(Routes.SignUpScreen) { inclusive = true }
                 launchSingleTop = true
             }
         }
     }
 
+    if (isUserDataLoading) {
+        ShimmeredHomeScreen(true)
+    } else {
+        Scaffold(
+            containerColor = Color(0xFFFFFFFF)
+        ) { innerPadding ->
 
-    Scaffold(
-        containerColor = Color(0xFFFFFFFF)
-    ) { innerPadding ->
+            Column(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .padding(16.dp)
+                    .fillMaxSize()
+            ) {
 
-        Column(
-            modifier = Modifier
-                .padding(innerPadding)
-                .padding(16.dp)
-                .fillMaxSize()
-        ) {
+                Spacer(modifier = Modifier.height(16.dp))
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "Hello!",
+                    fontSize = 50.sp,
+                    fontFamily = PlayFairDisplay,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF0295F6)
 
-            Text(
-                text = "Hello!",
-                fontSize = 50.sp,
-                fontFamily = PlayFairDisplay,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF0295F6)
+                )
 
-            )
+                Spacer(modifier = Modifier.height(16.dp))
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "Signup to get Started",
+                    fontSize = 24.sp,
+                    fontFamily = InterDisplay,
+                    fontWeight = FontWeight.Normal,
+                    lineHeight = 30.sp,
+                    color = Color(0xFF4E4B66)
+                )
 
-            Text(
-                text = "Signup to get Started",
-                fontSize = 24.sp,
-                fontFamily = InterDisplay,
-                fontWeight = FontWeight.Normal,
-                lineHeight = 30.sp,
-                color = Color(0xFF4E4B66)
-            )
+                Spacer(modifier = Modifier.height(28.dp))
 
-            Spacer(modifier = Modifier.height(28.dp))
+                EmailPasswordField(
+                    email = email,
+                    onEmailChange = {
+                        email = it
+                        emailError = null
+                    },
+                    password = password,
+                    onPasswordChange = {
+                        password = it
+                        passwordError = null
+                    },
+                    passwordVisible = passwordVisible,
+                    onPasswordVisibilityChange = { passwordVisible = !passwordVisible },
+                    isEmailError = emailError != null,
+                    isPasswordError = passwordError != null,
+                    emailSupportingText = emailError,
+                    passwordSupportingText = passwordError
+                )
 
-            EmailPasswordField(
-                email = email,
-                onEmailChange = {
-                    email = it
-                    emailError = null
-                },
-                password = password,
-                onPasswordChange = {
-                    password = it
-                    passwordError = null
-                },
-                passwordVisible = passwordVisible,
-                onPasswordVisibilityChange = { passwordVisible = !passwordVisible },
-                isEmailError = emailError != null,
-                isPasswordError = passwordError != null,
-                emailSupportingText = emailError,
-                passwordSupportingText = passwordError
-            )
+                Spacer(modifier = Modifier.height(16.dp))
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            CustomButton(
-                onButtonClick = {
-                    focusManager.clearFocus()
-                    authViewModel.signUp(email, password)
-                },
-                buttonText = "Sign Up",
-                buttonState = buttonState,
-                onSuccessAnimationFinished = {
-                    navHostController.navigate(Routes.LoginScreen) {
-                        popUpTo(Routes.SignUpScreen) {
-                            inclusive = true
+                CustomButton(
+                    onButtonClick = {
+                        focusManager.clearFocus()
+                        authViewModel.signUp(email, password)
+                    },
+                    buttonText = "Sign Up",
+                    buttonState = buttonState,
+                    onSuccessAnimationFinished = {
+                        navHostController.navigate(Routes.LoginScreen) {
+                            popUpTo(Routes.SignUpScreen) {
+                                inclusive = true
+                            }
                         }
                     }
-                }
-            )
+                )
 
-            Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
-            SocialSignInOptions(
-                onGoogleSignIn = {
-                    authViewModel.signInWithGoogle(context) {
-                        userProfileViewModel.getUserProfile()
-                    }
-                }
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            CustomBottomText(
-                text1 = "Already have an account ? ",
-                text2 = "Login",
-                onTextClick = {
-                    navHostController.navigate(Routes.LoginScreen) {
-                        popUpTo(Routes.SignUpScreen) {
-                            inclusive = true
+                SocialSignInOptions(
+                    onGoogleSignIn = {
+                        authViewModel.signInWithGoogle(context) {
+                            userProfileViewModel.getUserProfile()
                         }
-                        launchSingleTop = true
                     }
-                }
-            )
+                )
 
+                Spacer(modifier = Modifier.height(16.dp))
+
+                CustomBottomText(
+                    text1 = "Already have an account ? ",
+                    text2 = "Login",
+                    onTextClick = {
+                        navHostController.navigate(Routes.LoginScreen) {
+                            popUpTo(Routes.SignUpScreen) {
+                                inclusive = true
+                            }
+                            launchSingleTop = true
+                        }
+                    }
+                )
+            }
         }
     }
 }
