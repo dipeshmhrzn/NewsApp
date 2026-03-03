@@ -1,5 +1,6 @@
 package com.example.newsapp.presentation.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.newsapp.domain.model.UserProfile
@@ -21,14 +22,11 @@ class UserProfileViewModel @Inject constructor(
 
     private val _userProfile = MutableStateFlow<Result<UserProfile?>>(Result.Idle)
     val userProfile = _userProfile.asStateFlow()
-
-    init {
-        getUserProfile()
-    }
     fun getUserProfile() {
         viewModelScope.launch(Dispatchers.IO) {
             _userProfile.value = Result.Loading
             val userId = getCurrentUserIdUseCase()
+            Log.d("UserProfileViewModel", "Fetching profile for userId: $userId")
             if (userId == null) {
                 _userProfile.value = Result.Error("User not logged in")
                 return@launch
@@ -37,6 +35,10 @@ class UserProfileViewModel @Inject constructor(
             val result = userProfileUseCase.getUserProfile(userId)
             _userProfile.value = result
         }
+    }
+
+    fun clearUserProfile() {
+        _userProfile.value = Result.Idle
     }
 
 }

@@ -43,13 +43,14 @@ import com.example.newsapp.presentation.utils.shareUrlIntent
 import com.example.newsapp.presentation.viewmodels.BookmarkViewModel
 import com.example.newsapp.presentation.viewmodels.NewsViewModel
 import com.example.newsapp.presentation.viewmodels.UserProfileViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun MainScreen(
     navHostController: NavHostController,
     newsViewModel: NewsViewModel,
     bookmarkViewModel: BookmarkViewModel = hiltViewModel(),
-    userProfileViewModel: UserProfileViewModel = hiltViewModel()
+    userProfileViewModel: UserProfileViewModel
 ) {
 
     val innerNavController = rememberNavController()
@@ -84,6 +85,12 @@ fun MainScreen(
         ?.takeIf { it.isNotBlank() }
     val isLoading = userProfileState is Result.Loading
 
+    LaunchedEffect(Unit) {
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser != null) {
+            userProfileViewModel.getUserProfile()
+        }
+    }
 
     LaunchedEffect(bookmarkState.message) {
         bookmarkState.message?.let { msg ->

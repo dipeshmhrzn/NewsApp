@@ -1,6 +1,5 @@
 package com.example.newsapp.presentation.profilescreen
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -11,7 +10,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -22,7 +20,6 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Password
-import androidx.compose.material.icons.outlined.CameraAlt
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -39,45 +36,55 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import coil3.compose.AsyncImage
-import com.example.newsapp.R
-import com.example.newsapp.domain.model.UserProfile
 import com.example.newsapp.domain.util.Result
 import com.example.newsapp.navigation.Routes
 import com.example.newsapp.presentation.profilescreen.components.SignOutMenu
 import com.example.newsapp.presentation.viewmodels.AuthViewModel
 import com.example.newsapp.presentation.viewmodels.UserProfileViewModel
 import com.example.newsapp.ui.theme.InterDisplay
-import com.example.newsapp.ui.theme.NewsAppTheme
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun ProfileScreen(
     navHostController: NavHostController,
     authViewModel: AuthViewModel = hiltViewModel(),
-    userProfileViewModel: UserProfileViewModel = hiltViewModel()
+    userProfileViewModel: UserProfileViewModel
 ) {
 
     LaunchedEffect(Unit) {
-        userProfileViewModel.getUserProfile()
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser != null) {
+            userProfileViewModel.getUserProfile()
+        }
     }
 
     var isSignOutVisible by remember { mutableStateOf(false) }
 
     val userProfileState by userProfileViewModel.userProfile.collectAsState()
+    val authState by authViewModel.authState.collectAsState()
 
     val userProfile = (userProfileState as? Result.Success)?.data
     val email = userProfile?.emailAddress.orEmpty()
     val profilePicture = userProfile?.profilePicture.orEmpty()
     val isLoading = userProfileState is Result.Loading
 
+
+    LaunchedEffect(authState) {
+        if (authState is Result.Success) {
+            // Navigate to login screen after logout completes
+            navHostController.navigate(Routes.LoginScreen) {
+                popUpTo(0) { inclusive = true }
+                launchSingleTop = true
+            }
+            authViewModel.resetAuthState()
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         if (isLoading) {
@@ -269,27 +276,12 @@ fun ProfileScreen(
             SignOutMenu(
                 onDismiss = { isSignOutVisible = false },
                 onYesClick = {
-                    authViewModel.signOut()
-                    navHostController.navigate(Routes.LoginScreen) {
-                        popUpTo(0) {
-                            inclusive = true
-                        }
-                        launchSingleTop = true
-                    }
-                    authViewModel.resetAuthState()
+                    authViewModel.signOut(userProfileViewModel)
                     isSignOutVisible = false
                 }
             )
         }
 
 
-    }
-}
-
-@Preview
-@Composable
-private fun ProfilePrev() {
-    NewsAppTheme {
-        ProfileScreen(rememberNavController())
     }
 }

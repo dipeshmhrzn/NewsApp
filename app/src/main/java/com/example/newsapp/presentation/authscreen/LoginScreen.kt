@@ -37,14 +37,17 @@ import com.example.newsapp.presentation.authscreen.components.EmailPasswordField
 import com.example.newsapp.presentation.authscreen.components.SocialSignInOptions
 import com.example.newsapp.presentation.viewmodels.AuthDataStoreViewModel
 import com.example.newsapp.presentation.viewmodels.AuthViewModel
+import com.example.newsapp.presentation.viewmodels.UserProfileViewModel
 import com.example.newsapp.ui.theme.InterDisplay
 import com.example.newsapp.ui.theme.PlayFairDisplay
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 
 @Composable
 fun LoginScreen(
     navHostController: NavHostController,
     authViewModel: AuthViewModel = hiltViewModel(),
+    userProfileViewModel: UserProfileViewModel = hiltViewModel()
 ) {
 
     val focusManager = LocalFocusManager.current
@@ -59,6 +62,7 @@ fun LoginScreen(
     val context = LocalContext.current
     val authState by authViewModel.authState.collectAsState()
     val googleAuthState by authViewModel.googleAuthState.collectAsState()
+    val userProfileState by userProfileViewModel.userProfile.collectAsState()
     val openAddGoogleAccountEvent by authViewModel.openAddGoogleAccountEvent.collectAsState()
 
     val buttonState = when (authState) {
@@ -118,15 +122,7 @@ fun LoginScreen(
     LaunchedEffect(googleAuthState) {
         when (googleAuthState) {
             is Result.Success -> {
-                val firebaseUser = (googleAuthState as Result.Success<FirebaseUser>).data
                 Toast.makeText(context, "Google Sign-In Successful", Toast.LENGTH_SHORT).show()
-
-                navHostController.navigate(Routes.MainScreen) {
-                    popUpTo(Routes.LoginScreen) {
-                        inclusive = true
-                    }
-                    authViewModel.resetAuthState()
-                }
             }
 
             is Result.Error -> {
@@ -139,6 +135,15 @@ fun LoginScreen(
             }
 
             Result.Idle -> {
+            }
+        }
+    }
+
+    LaunchedEffect(userProfileState) {
+        if (userProfileState is Result.Success && FirebaseAuth.getInstance().currentUser != null) {
+            navHostController.navigate(Routes.MainScreen) {
+                popUpTo(Routes.LoginScreen) { inclusive = true }
+                launchSingleTop = true
             }
         }
     }
@@ -240,7 +245,9 @@ fun LoginScreen(
 
             SocialSignInOptions(
                 onGoogleSignIn = {
-                    authViewModel.signInWithGoogle(context)
+                    authViewModel.signInWithGoogle(context) {
+                        userProfileViewModel.getUserProfile()
+                    }
                 }
             )
 

@@ -20,12 +20,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.example.newsapp.domain.util.Result
 import com.example.newsapp.domain.util.ValidationErrors
 import com.example.newsapp.navigation.Routes
@@ -35,16 +33,16 @@ import com.example.newsapp.presentation.authscreen.components.CustomButton
 import com.example.newsapp.presentation.authscreen.components.EmailPasswordField
 import com.example.newsapp.presentation.authscreen.components.SocialSignInOptions
 import com.example.newsapp.presentation.viewmodels.AuthViewModel
+import com.example.newsapp.presentation.viewmodels.UserProfileViewModel
 import com.example.newsapp.ui.theme.InterDisplay
-import com.example.newsapp.ui.theme.NewsAppTheme
 import com.example.newsapp.ui.theme.PlayFairDisplay
-import com.google.firebase.auth.FirebaseUser
-import kotlinx.coroutines.delay
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun SignUpScreen(
     navHostController: NavHostController,
-    authViewModel: AuthViewModel = hiltViewModel()
+    authViewModel: AuthViewModel = hiltViewModel(),
+    userProfileViewModel: UserProfileViewModel = hiltViewModel()
 ) {
 
     val focusManager = LocalFocusManager.current
@@ -59,6 +57,7 @@ fun SignUpScreen(
     val context = LocalContext.current
     val authState by authViewModel.authState.collectAsState()
     val googleAuthState by authViewModel.googleAuthState.collectAsState()
+    val userProfileState by userProfileViewModel.userProfile.collectAsState()
     val openAddGoogleAccountEvent by authViewModel.openAddGoogleAccountEvent.collectAsState()
 
     val buttonState = when (authState) {
@@ -82,15 +81,7 @@ fun SignUpScreen(
     LaunchedEffect(googleAuthState) {
         when (googleAuthState) {
             is Result.Success -> {
-                val firebaseUser = (googleAuthState as Result.Success<FirebaseUser>).data
                 Toast.makeText(context, "Google Sign-In Successful", Toast.LENGTH_SHORT).show()
-
-                navHostController.navigate(Routes.MainScreen) {
-                    popUpTo(Routes.SignUpScreen) {
-                        inclusive = true
-                    }
-                    authViewModel.resetAuthState()
-                }
             }
 
             is Result.Error -> {
@@ -143,6 +134,17 @@ fun SignUpScreen(
             }
         }
     }
+
+
+    LaunchedEffect(userProfileState) {
+        if (userProfileState is Result.Success && FirebaseAuth.getInstance().currentUser != null) {
+            navHostController.navigate(Routes.MainScreen) {
+                popUpTo(Routes.LoginScreen) { inclusive = true }
+                launchSingleTop = true
+            }
+        }
+    }
+
 
     Scaffold(
         containerColor = Color(0xFFFFFFFF)
@@ -220,7 +222,9 @@ fun SignUpScreen(
 
             SocialSignInOptions(
                 onGoogleSignIn = {
-                    authViewModel.signInWithGoogle(context)
+                    authViewModel.signInWithGoogle(context) {
+                        userProfileViewModel.getUserProfile()
+                    }
                 }
             )
 

@@ -1,11 +1,13 @@
 package com.example.newsapp.navigation
 
+import android.util.Log
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -26,6 +28,8 @@ import com.example.newsapp.presentation.viewmodels.NewsViewModel
 import com.example.newsapp.presentation.onboardingscreen.OnBoardingScreen
 import com.example.newsapp.presentation.splashscreen.SplashScreen
 import com.example.newsapp.presentation.viewmodels.AuthDataStoreViewModel
+import com.example.newsapp.presentation.viewmodels.UserProfileViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun Navigation() {
@@ -33,9 +37,23 @@ fun Navigation() {
 
     val newsViewModel: NewsViewModel = hiltViewModel()
 
+    val profileViewModel: UserProfileViewModel = hiltViewModel()
+
     val authDataStoreViewModel: AuthDataStoreViewModel = hiltViewModel()
     val authDataStoreState by authDataStoreViewModel.authDataStoreState.collectAsState()
 
+    LaunchedEffect(authDataStoreState) {
+        Log.d(
+            "SplashCheck",
+            "firstTime: ${authDataStoreState.isFirstTimeLogin}, " +
+                    "loggedIn: ${authDataStoreState.isLoggedIn}"
+        )
+
+        Log.d(
+            "FirebaseUser",
+            FirebaseAuth.getInstance().currentUser?.uid ?: "NULL"
+        )
+    }
 
     NavHost(navController = navController, startDestination = Routes.SplashScreen) {
         composable<Routes.SplashScreen>(
@@ -113,7 +131,8 @@ fun Navigation() {
             }
         ) {
             LoginScreen(
-                navHostController = navController
+                navHostController = navController,
+                userProfileViewModel = profileViewModel
             )
 
         }
@@ -159,7 +178,7 @@ fun Navigation() {
                     )
                 )
             }
-        ) {backStackEntry ->
+        ) { backStackEntry ->
             val email = backStackEntry.arguments?.getString("email")
             ForgotPasswordScreen(
                 navHostController = navController,
@@ -189,7 +208,8 @@ fun Navigation() {
         ) {
             MainScreen(
                 navHostController = navController,
-                newsViewModel = newsViewModel
+                newsViewModel = newsViewModel,
+                userProfileViewModel = profileViewModel
             )
         }
 
@@ -238,7 +258,10 @@ fun Navigation() {
                 )
             }
         ) {
-            ProfileScreen(navHostController = navController)
+            ProfileScreen(
+                navHostController = navController,
+                userProfileViewModel = profileViewModel
+            )
         }
 
         composable<Routes.SearchScreen>(

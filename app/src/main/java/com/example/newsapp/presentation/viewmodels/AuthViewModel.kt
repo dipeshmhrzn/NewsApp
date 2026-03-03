@@ -23,6 +23,7 @@ import com.example.newsapp.domain.usecase.profileusecase.ProfileUseCase
 import com.example.newsapp.domain.util.Result
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.Companion.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -64,11 +65,14 @@ class AuthViewModel @Inject constructor(
             Log.d("AuthViewModel", "signUp: $result")
             _authState.value = result
             if (result is Result.Success) {
-                val userProfile = UserProfile(
-                    userId = getCurrentUserIdUseCase(),
-                    emailAddress = email
-                )
-                userProfileUseCase.saveUserProfile(userProfile)
+                val uid = FirebaseAuth.getInstance().currentUser?.uid
+                if (uid != null) {
+                    val userProfile = UserProfile(
+                        userId = uid,
+                        emailAddress = email
+                    )
+                    userProfileUseCase.saveUserProfile(userProfile)
+                }
             }
         }
     }
@@ -94,38 +98,40 @@ class AuthViewModel @Inject constructor(
             _authState.value = result
         }
     }
-
-    fun signInWithGoogle(context: Context) {
+    fun signInWithGoogle(context: Context, onProfileReady: () -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val credentialResponse = credentialManager.getCredential(context,getCredentialRequest)
-                if (credentialResponse.credential is CustomCredential && credentialResponse.credential.type == TYPE_GOOGLE_ID_TOKEN_CREDENTIAL){
+                val credentialResponse = credentialManager.getCredential(context, getCredentialRequest)
+                if (credentialResponse.credential is CustomCredential &&
+                    credentialResponse.credential.type == TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
+                ) {
                     val googleSignInToken = GoogleIdTokenCredential.createFrom(credentialResponse.credential.data)
                     val idToken = googleSignInToken.idToken
-                    val result =googleSignInUseCase(idToken)
-                    _googleAuthState.value=result
-                    if (result is Result.Success){
+                    val result = googleSignInUseCase(idToken)
+                    _googleAuthState.value = result
+
+                    if (result is Result.Success) {
                         setAuthDatastoreUseCase.setLoggedIn(true)
                         setAuthDatastoreUseCase.setFirstTimeLogin(false)
 
                         val firebaseUser = result.data
-
                         val existingProfile = userProfileUseCase.getUserProfile(firebaseUser.uid)
 
                         if (existingProfile is Result.Success && existingProfile.data != null) {
-
-                            // User profile exists - don't overwrite anything
-
+                            // Profile exists, trigger callback
+                            onProfileReady()
                         } else {
-                            // First time sign in - create new profile
+                            // First-time sign in → create profile
                             val userProfile = UserProfile(
                                 userId = firebaseUser.uid,
                                 emailAddress = firebaseUser.email ?: "",
                                 profilePicture = firebaseUser.photoUrl?.toString() ?: ""
                             )
                             userProfileUseCase.saveUserProfile(userProfile)
-                        }
 
+                            // Fetch the profile after saving
+                            onProfileReady()
+                        }
                     }
                 }
             }catch (e: GetCredentialCancellationException){
@@ -138,18 +144,13 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-
-    fun signOut() {
+    fun signOut(userProfileViewModel: UserProfileViewModel) {
         viewModelScope.launch(Dispatchers.IO) {
             _authState.value = Result.Loading
-            delay(300)
-            val result = signOutUseCase()
-            Log.d("AuthViewModel", "signOut: $result")
-
-            if (result is Result.Success) {
-                setAuthDatastoreUseCase.setLoggedIn(false)
-            }
-            _authState.value = result
+            FirebaseAuth.getInstance().signOut()
+            setAuthDatastoreUseCase.setLoggedIn(false)
+            userProfileViewModel.clearUserProfile()  // <-- Clear cached profile
+            _authState.value = Result.Success("Logged out")
         }
     }
 
